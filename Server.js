@@ -21,3 +21,8 @@ server.listen(3000, '0.0.0.0', () => {
     console.log('server attivo');
     
 });
+
+server.on('error', (err) => {
+    console.log(err);
+    
+})

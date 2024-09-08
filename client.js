@@ -1,7 +1,7 @@
 const net = require('net')
 const client = new net.Socket()
 
-client.connect(3000, '0.0.0.0', () => {
+client.connect(3000, '192.168.1.2', () => {
     console.log('connessione');
     client.write('sono client')
 })
