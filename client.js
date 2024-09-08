@@ -9,3 +9,8 @@ client.connect(3000, '192.168.1.2', () => {
 client.on('data', (data) => {
     console.log(data.toString('utf-8'));
 })
+
+client.on('error', (err) => {
+    console.log(err);
+    
+})
