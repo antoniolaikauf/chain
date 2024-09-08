@@ -5,14 +5,13 @@ const event = require('events')
 
 const server = net.createServer((socket) => {
     socket.on(('data'), (data) => {
-        console.log(data);
+        let text =data.toString('utf-8')
+        console.log(text);
         socket.write('ciao')
-        
     })
     socket.on('end', () => {
         console.log('close');
     })
-    
 })
 
 server.listen(9000, () => {
