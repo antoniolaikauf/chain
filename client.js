@@ -14,14 +14,14 @@ client.on('data', (data) => {
 client.on('error', (err) => {
     console.error(err.message);
 })
-// chiusura client 
+// chiusura server 
 client.on('end', () => {
     console.log('connessione chiusa dal server');
 })
 // chiusura client forzata
 process.on('SIGINT', () => {
     console.log('connessione chiusa');
-    client.end(() => { // chiusura è asincorna quindi messo settimeout 
+    client.end(() => { // dato tempo a client di chiudere la connessione settimeout 
         setTimeout(() => {
             process.exit(0); 
         }, 100);
