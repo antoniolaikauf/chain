@@ -1,17 +1,22 @@
 // nesuna instanza socket con il server perchè il node crea un collegamento socket con il client collegato 
 const net = require('net') // modulo per rete peer to peer
+const blockList = new net.BlockList(); // vedere se mettere regole specifiche tipo se prova a collegarsi più volte da quel ip 
 
 let clients = []
 const server = net.createServer((socket) => {
     
+    // controllo e client gia connesso
     const client = { 'IP': socket.remoteAddress, data: socket }
-    const check = clients.some(element =>  element.IP === client.IP )
-    if (check) socket.destroy()
-    
+    if (blockList.check(socket.remoteAddress)) {
+        socket.destroy()
+    }
+    else {
+        blockList.addAddress(socket.remoteAddress)
+        clients.push(client)
+    }
     // data dal client
     socket.on('data', (data) => {
         data=data.toString('utf-8')
-        clients.push(client)
         console.log(`client collegati : ${clients.length}`);
         clients.forEach((element,i) => {
             console.log(`client ${element.IP} connesso`);
