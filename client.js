@@ -1,5 +1,5 @@
 const net = require('net')
-const client = new net.Socket()
+const client = new net.Socket() // bisogno di creare una istanza perche il client si deve collegare al server 
 // ip computer 
 client.connect(3000, '192.168.1.7', () => {
     console.log('client connesso');
