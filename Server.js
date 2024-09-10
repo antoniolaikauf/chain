@@ -1,6 +1,6 @@
 // nesuna instanza socket con il server perchè il node crea un collegamento socket con il client collegato 
 const net = require('net') // modulo per rete peer to peer
-const blockList = new net.BlockList(); // vedere se mettere regole specifiche tipo se prova a collegarsi più volte da quel ip 
+const blockList = new net.BlockList(); // vedere se mettere regole specifiche tipo se prova a collegarsi più volte da quel ip
 
 let clients = []
 const server = net.createServer((socket) => {
@@ -46,3 +46,4 @@ process.on('SIGINT', () => {
     });
     if (clients.length === 0) process.exit(0)
 })
+
