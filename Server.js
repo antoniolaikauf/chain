@@ -8,8 +8,8 @@ const server = net.createServer((socket) => {
     // controllo e client gia connesso
     const client = { 'IP': socket.remoteAddress, data: socket }
     if (blockList.check(socket.remoteAddress)) {
-            socket.destroy()
-        }
+        socket.destroy()
+    }
     else {
         blockList.addAddress(socket.remoteAddress)
         clients.push(client)
@@ -30,7 +30,7 @@ const server = net.createServer((socket) => {
         clients.forEach(element => {
             new_blocklist.addAddress(element)
         });
-        blockList = new_blocklist
+        blockList = new_blocklist // blocklist con solo address che hanno il permesso 
         console.log(`client: ${socket.remoteAddress} scollegato\nclients collegati ${clients.length}`);
     });
     // errori 
