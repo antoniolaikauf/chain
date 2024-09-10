@@ -45,9 +45,11 @@ server.listen(3000, '0.0.0.0', () => {
 
 process.on('SIGINT', () => {
     console.log('server chiuso');
-    clients.forEach((client,i) => { // chiudi connessione con client 
+    clients.forEach((client, i) => { // chiudi connessione con client 
         client.data.destroy();
-        clients.splice(i)
+        
+        clients.splice(i,1)
     });
+    
     if (clients.length === 0) process.exit(0)
 })
