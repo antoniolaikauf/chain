@@ -1,6 +1,6 @@
-
-// UDP è un protocollo di rete che consente l'invio di pacchetti di dati 
+// UDP è un protocollo di rete che consente l'invio di pacchetti di dati
 // tra host in una rete senza stabilire una connessione formale 
+const dgram = require('dgram')
 const listen_client = new dgram.createSocket('udp4')
 const { Buffer } = require('buffer');
 
