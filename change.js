@@ -7,9 +7,9 @@ const address = '255.255.255.255';
 let partecipanti = []
 let count= 0
 listen_server.on("listening", () => {      
-    const message = Buffer.from(partecipanti); // string to ascii
+    // const message = Buffer.from(partecipanti); // string to ascii
     listen_server.setBroadcast(true); // broadcasting messaggio in rete
-    listen_server.send(message, port, address); // invio mesaggio
+    // listen_server.send(message, port, address); // invio mesaggio
 });
 
 listen_server.on("error", (err) => {
@@ -17,18 +17,21 @@ listen_server.on("error", (err) => {
 });
 
 listen_server.on("message", (msg, rinfo) => { 
-    const nuoviPartecipanti = Array.from(msg)
-    if (!nuoviPartecipanti.includes(rinfo.address))
-    {
-        partecipanti.push(rinfo.address)
+    const nuoviPartecipanti = JSON.parse(msg.toString());
+
+    // Check if the address of the sender is already in the list
+    if (!partecipanti.includes(rinfo.address)) {
+        partecipanti.push(rinfo.address); // Add the new peer to the list
         console.log(`Nuovo peer scoperto: ${rinfo.address}`);
+        console.log(`Lista peer attuale: ${partecipanti}`);
     }
+
+    // Convert the updated participants list to a JSON string and then to a Buffer
+    const message = Buffer.from(JSON.stringify(partecipanti));
     
-    if (nuoviPartecipanti.length > partecipanti.length) {
-        const message = Buffer.from(partecipanti)
-        listen_server.send(message, port,address)
+    // Send the updated list to the entire network (excluding itself)
+    if (rinfo.address !== listen_server.address().address) {
+        listen_server.send(message, port, address); // Broadcast the updated list
     }
-    
-    console.log(partecipanti);
 });
 listen_server.bind(port);
