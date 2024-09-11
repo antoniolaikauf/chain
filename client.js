@@ -1,8 +1,8 @@
 const dgram = require("dgram"); // UDP è un protocollo di rete che consente l'invio di pacchetti di dati tra host in una rete senza stabilire una connessione formale
 const listen_server = new dgram.createSocket("udp4");
 const { Buffer } = require("buffer");
-const net = require("net"); // protocollo TCP/IP 
-const client = new net.Socket(); 
+const net = require("net"); // protocollo TCP/IP
+const client = new net.Socket();
 // const crypto = require('crypto')
 // const sha256 = crypto.createHash('sha256')
 // var readline = require('readline');
@@ -13,7 +13,7 @@ const port = 41234;
 const address = "255.255.255.255";
 
 listen_server.on("listening", () => {
-  listen_server.setBroadcast(true); // broadcasting messaggio in rete 
+  listen_server.setBroadcast(true); // broadcasting messaggio in rete
   listen_server.send(message, port, address); // invio mesaggio
 });
 
@@ -27,7 +27,7 @@ listen_server.on("message", (msg, rinfo) => {
 });
 listen_server.bind(port);
 
-// COLLEGAMENTO CLIENT 
+// COLLEGAMENTO CLIENT
 function server_peer(IP_address) {
   // ip computer
   client.connect(3000, IP_address, () => {
@@ -52,7 +52,7 @@ function server_peer(IP_address) {
   process.on("SIGINT", () => {
     console.log("connessione chiusa");
     client.end(() => {
-      // dato tempo a client di chiudere la connessione 
+      // dato tempo a client di chiudere la connessione
       setTimeout(() => {
         process.exit(0);
       }, 100);

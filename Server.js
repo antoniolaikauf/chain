@@ -20,6 +20,7 @@ const server = net.createServer((socket) => {
         console.log(`client collegati : ${clients.length}`);
         clients.forEach((element,i) => {
             console.log(`client ${element.IP} connesso`);
+            // element.data.write(`Messaggio da ${socket.remoteAddress}: ${data}`);
         });
         socket.write(`Benvenuto ${socket.remoteAddress}`)
     })
