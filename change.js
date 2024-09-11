@@ -15,7 +15,64 @@ listen_server.on("error", (err) => {
   console.error(err.message);
 });
 
-listen_server.on("message", (msg, rinfo) => {  
+listen_server.on("message", (msg, rinfo) => {   
+    listen_server.setBroadcast(true); 
+
+    // Aggiungi il mittente alla lista dei partecipanti se non è già presente
+    if (!partecipanti.has(rinfo.address)) {
+        partecipanti.add(rinfo.address);
+        console.log(`Nuovo peer scoperto: ${rinfo.address}`);
+
+        // Invia la lista aggiornata a tutti i partecipanti
+        const partecipantiMessage = Buffer.from(Array.from(partecipanti).join(',')); 
+        listen_server.send(partecipantiMessage, port, address);
+            // Stampa la lista attuale dei partecipanti
+    console.log(`Lista peer attuale: ${Array.from(partecipanti)}`);
+    }
+});
+listen_server.bind(port);
+
+// const dgram = require("dgram"); 
+// const listen_server = dgram.createSocket("udp4");
+// const { Buffer } = require("buffer");
+
+// const port = 41234;
+// const address = '255.255.255.255';
+// let partecipanti = new Set(); // Utilizziamo un Set per evitare duplicati
+
+// listen_server.on("listening", () => {  
+    
+//     const message = Buffer.from('collegato'); 
+//     listen_server.setBroadcast(true); 
+//     listen_server.send(message, port, address); 
+// });
+
+// listen_server.on("error", (err) => {
+//     console.error(err.message);
+// });
+
+// listen_server.on("message", (msg, rinfo) => {   
+//     listen_server.setBroadcast(true); 
+
+//     // Aggiungi il mittente alla lista dei partecipanti se non è già presente
+//     if (!partecipanti.has(rinfo.address)) {
+//         partecipanti.add(rinfo.address);
+//         console.log(`Nuovo peer scoperto: ${rinfo.address}`);
+
+//         // Invia la lista aggiornata a tutti i partecipanti
+//         const partecipantiMessage = Buffer.from(Array.from(partecipanti).join(',')); 
+//         listen_server.send(partecipantiMessage, port, address);
+//     }
+
+//     // Stampa la lista attuale dei partecipanti
+//     console.log(`Lista peer attuale: ${Array.from(partecipanti)}`);
+// });
+
+// // Avvia il server sulla porta specificata
+// listen_server.bind(port);
+
+
+
 // TODO MIGLIORARE PERCHè SAREBBE PIù CORRETTTO SE LI FACESSE SUL MSG
     // const peers = Array.from(msg);
     // let words =''
@@ -24,13 +81,3 @@ listen_server.on("message", (msg, rinfo) => {
     //        words+= String.fromCharCode(element)  
     //     });
     // console.log(words, typeof words);
-    
-    listen_server.setBroadcast(true); 
-    if (!partecipanti.has(rinfo.address)) {
-        partecipanti.add(rinfo.address)
-        listen_server.send(Buffer.from(Array.from(partecipanti)), port, address)
-        console.log(`Nuovo peer scoperto: ${rinfo.address}`);
-        console.log(`Lista peer attuale: ${JSON.stringify(Array.from(partecipanti))}`);
-    }   
-});
-listen_server.bind(port);
