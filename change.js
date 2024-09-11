@@ -17,24 +17,18 @@ listen_server.on("error", (err) => {
 });
 
 listen_server.on("message", (msg, rinfo) => { 
-    // bisogna farlo sul mesaggio
-    listen_server.setBroadcast(true); 
-    data = Array.from(msg)
-    console.log(data);
-    let messgae = Buffer.from(data)
-    if (!data[0] == '0') {
-        data.push(rinfo.address)
-        listen_server.send(Buffer.from(messgae), port, address);   
-    }   
+    const nuoviPartecipanti = Array.from(msg)
+    if (!nuoviPartecipanti.includes(rinfo.address))
+    {
+        partecipanti.push(rinfo.address)
+        console.log(`Nuovo peer scoperto: ${rinfo.address}`);
+    }
+    
+    if (nuoviPartecipanti.length > partecipanti.length) {
+        const message = Buffer.from(partecipanti)
+        listen_server.send(message, port,address)
+    }
+    
+    console.log(partecipanti);
 });
 listen_server.bind(port);
-
-
-// TODO MIGLIORARE PERCHè SAREBBE PIù CORRETTTO SE LI FACESSE SUL MSG
-    // const peers = Array.from(msg);
-    // let words =''
-    //     peers.forEach(element => {
-    //         // console.log(element.toString('utf-8'));
-    //        words+= String.fromCharCode(element)  
-    //     });
-    // console.log(words, typeof words);
