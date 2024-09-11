@@ -1,13 +1,26 @@
+//VEDERE SE USARE IL TIPO DI FEE COME QUELLE DI ETH 
 class Transection {
-    constructor() {
-        
+    constructor(amount, sender, reciver, fee, looktime) { // calcolare change se necessario
+        this.amount = amount
+        this.sender = sender
+        this.reciver = reciver
+        this.fee = fee
+        this.looktime = looktime
     }
 }
 
 
 class Block{
-    constructor() {
-        
+    constructor(altezza, tx_root, nonce, timestamp, coinbase_transection, copy, target, reward, hash_prev) {
+        this.altezza = altezza
+        this.tx_root = tx_root
+        this.nonce = nonce
+        this.timestamp = timestamp
+        this.coinbase_transection = coinbase_transection
+        this.copy = copy
+        this.target = target
+        this.reward = reward
+        this.hash_prev = hash_prev
     }
 }
 
@@ -18,8 +31,10 @@ class BlockChain {
     }
 }
 
-let Transection = new Transection()
+let transection = new Transection()
+let mempool = []
 let block = new Block()
+
 let chain = new BlockChain(block)
 
 // nel blocco ci deve essere header con interno precedente hash blocco, target per pow,
