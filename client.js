@@ -3,13 +3,27 @@ const client = new net.Socket();
 // const crypto = require('crypto')
 // const sha256 = crypto.createHash('sha256')
 // var readline = require('readline');
+const dgram = require("dgram"); // UDP è un protocollo di rete che consente l'invio di pacchetti di dati tra host in una rete senza stabilire una connessione formale
+const listen_server = new dgram.createSocket("udp4");
+const { Buffer } = require("buffer");
+const dns = require("node:dns");
+const os = require("node:os");
+const options = { family: 4 };
 
 const port = 41234;
 const address = "255.255.255.255";
-
+let partecipanti = new Set();
+let ip_address=''
 listen_server.on("listening", () => {
-  listen_server.setBroadcast(true); // broadcasting messaggio in rete
-  listen_server.send(message, port, address); // invio mesaggio
+  dns.lookup(os.hostname(), options, (err, addr) => {
+    if (err) {
+      console.error(err);
+    } else {
+      listen_server.setBroadcast(true);
+      // console.log(`IPv4 address: ${addr}`);
+      listen_server.send(Buffer.from(addr), port, address);
+    }
+  });
 });
 
 listen_server.on("error", (err) => {
@@ -17,12 +31,15 @@ listen_server.on("error", (err) => {
 });
 
 listen_server.on("message", (msg, rinfo) => {
-    console.log(`messaggio ${msg} da ${rinfo.address} porta ${rinfo.port}`);
-    server_peer(rinfo.address) // collegamento al computer in rete
+
+  if (!ip_address.includes(rinfo.address)) {
+    ip_address += rinfo.address
+    server_peer(ip_address)
+    console.log(ip_address);
+    listen_server.send(Buffer.from(ip_address),port,address)
+  }
 });
 listen_server.bind(port);
-
-//sistemare address 
 
 // COLLEGAMENTO CLIENT
 function server_peer(IP_address) {
