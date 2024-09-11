@@ -3,7 +3,9 @@ const listen_server = new dgram.createSocket("udp4");
 const { Buffer } = require("buffer");
 const net = require("net"); // protocollo TCP/IP 
 const client = new net.Socket(); 
-
+// const crypto = require('crypto')
+// const sha256 = crypto.createHash('sha256')
+// var readline = require('readline');
 
 const message = Buffer.from("sei collegato"); // string to ascii
 
