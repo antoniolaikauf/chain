@@ -4,12 +4,11 @@ let random_number = () => {
 
 let numbers='';
 
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 16; i++) {
     let number='';
-    for (let y = 0; y < 6; y++) {
-        number += random_number();        
+    for (let y = 0; y < 4; y++) {
+        number += random_number().toString('2').padStart(4,0);        
     }
     numbers+=number
 }
-
 console.log(numbers);
