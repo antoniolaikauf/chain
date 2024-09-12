@@ -11,7 +11,8 @@ class Transection {
 
 
 class Block{
-    constructor(altezza, tx_root, nonce, timestamp, coinbase_transection, copy, target, reward, hash_prev) {
+    constructor(altezza, tx_root, nonce, timestamp, coinbase_transection,
+                copy, target, reward, hash_prev, uncle) {
         this.altezza = altezza
         this.tx_root = tx_root
         this.nonce = nonce
@@ -21,6 +22,7 @@ class Block{
         this.target = target
         this.reward = reward
         this.hash_prev = hash_prev
+        this.uncle = uncle
     }
 }
 
