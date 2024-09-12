@@ -1,14 +1,12 @@
-let random_number = () => {
-    return  Math.floor(Math.random() * 6) + 1
+const crypto = require("crypto");
+
+let numbers = "";
+for (let i = 0; i < 64; i++) {
+  let chunk = crypto.randomInt(0, 4); // 0 a 3
+  numbers = numbers.concat(chunk.toString(2).padStart(2, 0));
 }
 
-let numbers='';
-
-for (let i = 0; i < 16; i++) {
-    let number='';
-    for (let y = 0; y < 4; y++) {
-        number += random_number().toString('2').padStart(4,0);        
-    }
-    numbers+=number
-}
-console.log(numbers);
+const hash = crypto.createHash("sha256");
+hash.update(numbers);
+const private_key=hash.copy().digest("hex");
+console.log(private_key);
