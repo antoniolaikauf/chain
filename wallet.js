@@ -22,6 +22,7 @@ console.log(`private key: ${private_key.toString("hex")}\npubblic key: ${public_
 // firma usare ecdsa key function
 
 function process_address(PK) {
+  // doppio hash e alla fine in base58 piu il prefisso per riconoscere l'address 
   const sha256 = crypto.createHash("sha256");
   sha256.update(PK);
   const digest_sha = sha256.digest().toString("hex");
