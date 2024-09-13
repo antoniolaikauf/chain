@@ -7,28 +7,27 @@ const max_ecdsa = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD2
 const Elliptic_Curve_secp256k1 = crypto.createECDH("secp256k1");
 
 function entropia() {
-  let bits = "";
-  for (let i = 0; i < 64; i++) {
-    let chunk = crypto.randomInt(0, 4); // 0 a 3
-    bits = chunk.toString(2).padStart(2, 0);
-    // ogni lancio genera 2 bit di entropia fino a raggiungere 128 bit di entropia
-    // per calcolare entropia Math.log2(4) in 4 sarebbero tutti i possibili esiti da 0 a 3
-    bits = bits.concat(bits);
-  }
-  return bits;
+  return crypto.randomBytes(32); // 128 bits entropia 
 }
 
 const valid_private_key = (n, b) => {
   const private_key = crypto.createHash("sha256").update(b, "utf-8").digest();
   const number_private_key = BigInt("0x" + private_key.toString("hex"));
-  if (1 <= number_private_key && number_private_key <= n) return private_key;
+  if (1n <= number_private_key && number_private_key <= n) return private_key; // 1n perchè si utilizza numeri troppo grandi per rappresentare numeri in js e se si fa un controllo tra bigint o n esce un errore 
   else valid_private_key(n, entropia());
 };
 
 const private_key = valid_private_key(max_ecdsa, entropia());
-const keyPair = ec.keyFromPrivate(private_key)
+const keyPair = ec.keyFromPrivate(private_key) // coppia di chiavi
 const public_key = keyPair.getPublic('hex')
-// la public key 
+
+/*
+  la public key con 04 prefisso significa che non è compressa con lunghezza 130 hex i primi
+  due sono il prefisso, i succesivi 64 hex sono cordinata x e i rimanenti 64 hex sono y
+  se ha 02 o 03 allora è compressa 02 sarebbe il prefisso che indica y è un valore pari 03 è un
+  valore dispari 
+*/
+
 console.log(`private key: ${private_key.toString("hex")}\npubblic key: ${public_key}`);
 
 function process_address(PK) {
@@ -49,7 +48,7 @@ console.log(`address: ${process_address(public_key)}`);
 
 const signature = keyPair.sign(private_key); // Firma 
 
-// Converte la firma in formato DER
+//  firma in formato DER
 const derSign = signature.toDER('hex');
 console.log(`firma tranazione: ${derSign}`);
-console.log(keyPair.verify(private_key, derSign));
+console.log(keyPair.verify(private_key, derSign)); // verifica firma con chiave privata 
