@@ -26,9 +26,10 @@ const valid_private_key = (n, b) => {
 };
 
 const private_key = valid_private_key(max_ecdsa, entropia());
-const public_key = ec.keyFromPrivate(private_key)
+const keyPair = ec.keyFromPrivate(private_key)
+const public_key = keyPair.getPublic('hex')
 // la public key 
-console.log(`private key: ${private_key.toString("hex")}\npubblic key: ${public_key.getPublic('hex')}`);
+console.log(`private key: ${private_key.toString("hex")}\npubblic key: ${public_key}`);
 
 function process_address(PK) {
   // doppio hash e alla fine in base58 piu il prefisso per riconoscere l'address
@@ -44,16 +45,11 @@ function process_address(PK) {
   return "c" + encoded;
 }
 
-console.log(`address: ${process_address(public_key.getPublic('hex'))}`);
+console.log(`address: ${process_address(public_key)}`);
 
+const signature = keyPair.sign(private_key); // Firma 
 
-// console.log(`Private Key: ${privateKeyHex}`);
-// console.log(`Public Key: ${publicKey}`);
-
-// // Firma una transazione
-// const msgHash = crypto.createHash('sha256').update('transazione').digest(); // Hash della transazione
-// const signature = keyPair.sign(msgHash); // Firma usando la chiave privata generata
-
-// // Converte la firma in formato DER
-// const derSign = signature.toDER('hex');
-// console.log(`Signature: ${derSign}`);
+// Converte la firma in formato DER
+const derSign = signature.toDER('hex');
+console.log(`firma tranazione: ${derSign}`);
+console.log(keyPair.verify(private_key, derSign));

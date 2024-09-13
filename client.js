@@ -18,7 +18,7 @@ listen_server.on("listening", () => {
   // ottieni ip macchina
   dns.lookup(os.hostname(), options, (err, addr) => {
     if (err) {
-      console.error(err);
+      console.error(err); 
     } else {
       listen_server.setBroadcast(true);
       // console.log(`IPv4 address: ${addr}`);
