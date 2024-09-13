@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "bs58": "^6.0.0",
+    "elliptic": "^6.5.7",
     "ip": "^2.0.1",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
