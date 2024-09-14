@@ -1,26 +1,25 @@
 const crypto = require("crypto");
 const base58 = require("bs58").default;
-const EC = require('elliptic').ec; 
-const ec = new EC('secp256k1'); // curva secp256k1
-const mongoose = require('module')
+const EC = require("elliptic").ec;
+const ec = new EC("secp256k1"); // curva secp256k1
 
 const max_ecdsa = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
-const Elliptic_Curve_secp256k1 = crypto.createECDH("secp256k1");
 
 function entropia() {
-  return crypto.randomBytes(32); // 128 bits entropia 
+  return crypto.randomBytes(32); // 128 bits entropia
 }
 
 const valid_private_key = (n, b) => {
   const private_key = crypto.createHash("sha256").update(b, "utf-8").digest();
   const number_private_key = BigInt("0x" + private_key.toString("hex"));
-  if (1n <= number_private_key && number_private_key <= n) return private_key; // 1n perchè si utilizza numeri troppo grandi per rappresentare numeri in js e se si fa un controllo tra bigint o n esce un errore 
+  if (1n <= number_private_key && number_private_key <= n)
+    return private_key; // 1n perchè si utilizza numeri troppo grandi per rappresentare numeri in js e se si fa un controllo tra bigint o n esce un errore
   else valid_private_key(n, entropia());
 };
 
 const private_key = valid_private_key(max_ecdsa, entropia());
-const keyPair = ec.keyFromPrivate(private_key) // coppia di chiavi
-const public_key = keyPair.getPublic('hex')
+const keyPair = ec.keyFromPrivate(private_key); // coppia di chiavi
+const public_key = keyPair.getPublic("hex");
 
 /*
   la public key con 04 prefisso significa che non è compressa con lunghezza 130 hex i primi
@@ -45,9 +44,7 @@ function process_address(PK) {
   return "c" + encoded;
 }
 
-console.log(`address: ${process_address(public_key)}`);
-
-// signature_check('trnsazione', private_key)
-
-
-exports.wallet = { private_key, keyPair }
+let nonce = 0;
+let amount = 0;
+const address = process_address(public_key);
+exports.account = { private_key, keyPair, address, nonce, amount };

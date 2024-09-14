@@ -1,4 +1,4 @@
-const { wallet } = require('./wallet.js');
+const { account } = require("./account.js");
 
 // VEDERE SE USARE IL TIPO DI FEE COME QUELLE DI ETH
 class Transection {
@@ -11,7 +11,7 @@ class Transection {
     this.looktime = looktime;
     this.timestamp = new Date();
     this.transection_id = "";
-    this.signature = this.signature_check(wallet.keyPair, wallet.private_key);
+    this.signature = this.signature_check(account.keyPair, account.private_key);
     this.nonce = "";
     this.status = "";
   }
@@ -21,7 +21,13 @@ class Transection {
     //  firma in formato DER
     const derSign = signature.toDER("hex");
     console.log(`firma tranazione: ${derSign}`);
-    console.log(keys.verify(p_k, derSign)); // verifica firma con chiave privata
+    return keys.verify(p_k, derSign); // verifica firma con chiave privata
+  }
+
+  send() {
+    if (this.signature === true) {
+      console.log("firma corretta");
+    }
   }
 }
 
@@ -46,9 +52,9 @@ class BlockChain {
   }
 }
 
-let transection = new Transection();
+let transection = new Transection(100, account.address, "account ricevente", 1, null);
 
-// transection.signature_check()
+transection.send();
 
 let mempool = [];
 let block = new Block();
