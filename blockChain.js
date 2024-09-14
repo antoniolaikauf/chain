@@ -3,7 +3,7 @@ const { account } = require("./account.js");
 
 // VEDERE SE USARE IL TIPO DI FEE COME QUELLE DI ETH
 class Transection {
-  constructor(amount, sender, reciver, fee, looktime, account_balance) {
+  constructor(amount, sender, reciver, fee, looktime) {
     // calcolare change se necessario
     this.amount = amount; // amount in go per fare un ci ci vuole 10000000
     this.sender = sender;
@@ -16,11 +16,11 @@ class Transection {
     this.nonce;
     this.status = "pending";
     this.fee_price = 0.5;
-    this.account_balance = account_balance;
+    // this.account_balance = account_balance;
   }
 
   transection_id() {
-    let data = `${this.amount},${this.sender},${this.reciver},${account.nonce},${this.timestamp}`;
+    let data = `${this.amount},${this.sender},${this.reciver},${this.sender},${this.timestamp}`; // nel secondo ci deve essere il nonce del sender
     const hash = crypto.createHash("sha256").update(data, "utf-8").digest("hex");
     account.nonce++;
     return hash;
@@ -33,24 +33,24 @@ class Transection {
     return keys.verify(p_k, derSign); // verifica firma con chiave privata
   }
 
-  // TODO QUEST ATRANAZIONE VALIDARE SULLA RETE
   send(cb_transection) {
-    const total_fee = 21.0 * 1000 * 0.1e-8 + (21.0 * 1000 * 0.1e-8) / this.reciver.length;
+    const fee_fixed = 21.0 * 1000 * 0.1e-8;
+    const total_fee = fee_fixed + fee_fixed / this.reciver.length;
     let index = 0;
 
     if (this.signature === true) {
-      if (this.account_balance < this.amount || this.amount > this.account_balance) throw new RangeError("error balance");
-      else if (this.amount < 0) throw new Error("value amount wrong");
+      if (this.sender < this.amount * this.reciver.length) throw new RangeError("error balance");
+      else if (this.amount < 0) throw new Error("value amount wrong"); 
       else if (total_fee > this.fee) {
-        this.error_fee(this.account_balance, cb_transection);
+        this.error_fee(this.reciver, cb_transection);
       } else {
         /*
            se si ha solo un address allora si invierà la quantità a quello se se ne
-           avranno di più allora si invierà la quantita a tutti gli address
+           avranno di più allora si invierà la quantita a tutti gli address devi controllare il balance di ogni account 
         */
         do {
-          this.account_balance -= this.amount;
-          this.reciver[index] = this.amount;
+          this.sender -= this.amount;
+          this.reciver[index] += this.amount;
           index++;
         } while (index < this.reciver.length);
       }
@@ -85,18 +85,15 @@ class BlockChain {
   }
 }
 
-// let transection = new Transection(100, account.address, [" account ricevente"], 1, null, account.balance);
+let transection = new Transection(100, account.address, [" account ricevente"], 1, null);
 let transection2 = new Transection(
   100,
   account.address,
   ["account ricevente", "account ricevente"],
   0.00050051000000000000002,
-  null,
-  account.balance
+  null
 );
-
-// console.log(transection.txid);
-// transection.send();
+transection.send();
 
 transection2.send();
 
