@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const base58 = require("bs58").default;
 const EC = require('elliptic').ec; 
 const ec = new EC('secp256k1'); // curva secp256k1
+const mongoose = require('module')
 
 const max_ecdsa = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
 const Elliptic_Curve_secp256k1 = crypto.createECDH("secp256k1");
@@ -46,9 +47,7 @@ function process_address(PK) {
 
 console.log(`address: ${process_address(public_key)}`);
 
-const signature = keyPair.sign(private_key); // Firma 
+// signature_check('trnsazione', private_key)
 
-//  firma in formato DER
-const derSign = signature.toDER('hex');
-console.log(`firma tranazione: ${derSign}`);
-console.log(keyPair.verify(private_key, derSign)); // verifica firma con chiave privata 
+
+exports.wallet = { private_key, keyPair }
