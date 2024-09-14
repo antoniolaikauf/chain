@@ -1,19 +1,27 @@
+const crypto = require("crypto");
 const { account } = require("./account.js");
 
 // VEDERE SE USARE IL TIPO DI FEE COME QUELLE DI ETH
 class Transection {
   constructor(amount, sender, reciver, fee, looktime) {
     // calcolare change se necessario
-    this.amount = amount;
+    this.amount = amount.toString();
     this.sender = sender;
     this.reciver = reciver;
     this.fee = fee;
     this.looktime = looktime;
     this.timestamp = new Date();
-    this.transection_id = "";
+    this.txid = this.transection_id();
     this.signature = this.signature_check(account.keyPair, account.private_key);
     this.nonce = "";
     this.status = "";
+  }
+
+  transection_id() {
+    let data =`${this.amount},${this.sender},${this.reciver},${account.nonce},${this.timestamp}`;
+    const hash = crypto.createHash("sha256").update(data, "utf-8").digest("hex");
+    account.nonce++;
+    return hash;
   }
 
   signature_check(keys, p_k) {
@@ -55,6 +63,7 @@ class BlockChain {
 let transection = new Transection(100, account.address, "account ricevente", 1, null);
 
 transection.send();
+console.log(transection.txid);
 
 let mempool = [];
 let block = new Block();

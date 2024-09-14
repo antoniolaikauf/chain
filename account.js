@@ -45,6 +45,6 @@ function process_address(PK) {
 }
 
 let nonce = 0;
-let amount = 0;
+let balance = 0;
 const address = process_address(public_key);
-exports.account = { private_key, keyPair, address, nonce, amount };
+exports.account = { private_key, keyPair, address, nonce, balance };
