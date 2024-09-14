@@ -13,29 +13,40 @@ class Transection {
     this.timestamp = new Date();
     this.txid = this.transection_id();
     this.signature = this.signature_check(account.keyPair, account.private_key);
-    this.nonce = "";
-    this.status = "";
+    this.nonce;
+    this.status = "pending";
+    this.fee_price = 0.5;
   }
 
   transection_id() {
-    let data =`${this.amount},${this.sender},${this.reciver},${account.nonce},${this.timestamp}`;
+    let data = `${this.amount},${this.sender},${this.reciver},${account.nonce},${this.timestamp}`;
     const hash = crypto.createHash("sha256").update(data, "utf-8").digest("hex");
     account.nonce++;
+
     return hash;
   }
 
   signature_check(keys, p_k) {
     const signature = keys.sign(p_k); // Firma
-    //  firma in formato DER
-    const derSign = signature.toDER("hex");
-    console.log(`firma tranazione: ${derSign}`);
+    const derSign = signature.toDER("hex"); // firma in formato DER
+    // console.log(`firma transazione: ${derSign}`);
     return keys.verify(p_k, derSign); // verifica firma con chiave privata
   }
 
   send() {
+    const total_fee = 21.0 * 100 * 0.1e-8;
     if (this.signature === true) {
-      console.log("firma corretta");
-    }
+      if (account.balance < this.amount || this.amount > account.balance) throw new RangeError("error balance");
+      else if (this.amount < 0) throw new Error("value amount wrong");
+      else if (total_fee < fee) {
+        account.balance -= this.fee;
+        this.reciver += this.fee;
+        throw Error("fee non enough");
+      } else {
+        account.balance -= this.amount;
+        this.reciver += this.amount;
+      }
+    } else throw Error("signature wrong");
   }
 }
 
@@ -61,6 +72,7 @@ class BlockChain {
 }
 
 let transection = new Transection(100, account.address, "account ricevente", 1, null);
+let transection2 = new Transection(100, account.address, "account ricevente", 1, null);
 
 transection.send();
 console.log(transection.txid);
