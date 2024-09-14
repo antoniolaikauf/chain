@@ -102,6 +102,11 @@ let block = new Block();
 
 let chain = new BlockChain(block);
 
+/*
+la trasmissione deve essere corretta e dopo verra trasmesa sulla rete gli altri nodi la controlleranno e se è valida verra 
+messa nella mempool 
+*/
+
 // nel blocco ci deve essere header con interno precedente hash blocco, target per pow,
 // zii se blocco creato contemporaneamente, altezza, tx_root, nonce, coinbase transection, Timestamp, in blocco tenere solo wallet aggiornato
 // non tutta la copia della blockchain
