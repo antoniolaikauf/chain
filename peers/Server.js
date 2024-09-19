@@ -2,6 +2,7 @@
 const net = require("net"); // modulo per rete peer to peer
 let blockList = new net.BlockList(); // vedere se mettere regole specifiche tipo se prova a collegarsi più volte da quel ip
 const crypto = require("crypto");
+const { account } = require("../account.js");
 
 let clients = [];
 const server = net.createServer((socket) => {
@@ -15,14 +16,24 @@ const server = net.createServer((socket) => {
   }
   // data dal client
   socket.on("data", (data) => {
-      const content = JSON.parse(data.toString());
-    if ('TXid' in content) {
-      if (controllo_nonce(content.TXid.nonce, "qua ci va account nonce") && controllo_hash(content)) {
+    const content = JSON.parse(data.toString());
+    // SISTEMARE FIRMA PERCHE NON SONO UGUALI IN QUESTO MODO E QUANDO INVIO IL KEYPAIR NON è CORRETTO
+    // const nonce_transection = Buffer.from(content.TXid.nonce.toString());
+    // const i = account.keyPair.sign(nonce_transection)
+    // const t = i.toDER('hex')
+    // console.log(t);
+
+    if ("TXid" in content) {
+      if (
+        controllo_nonce(content.nonce.nonce_transection, content.nonce.nonce_account) &&
+        controllo_hash(content)
+        // signature(content.signature, content.TXid.nonce, account.keyPair)
+      ) {
         console.log(content);
         console.log("transazione corretta");
       } // qua va il nonce dell'account
       else throw Error("nonce non valido");
-    } else {        
+    } else {
       console.log(`client collegati : ${clients.length}`);
       clients.forEach((element, i) => {
         console.log(`client ${element.IP} connesso`);
@@ -63,11 +74,25 @@ process.on("SIGINT", () => {
 });
 
 function controllo_nonce(nonce_transection, nonce_account) {
-  return nonce_transection === 1;
+  return nonce_transection === nonce_account;
 }
-
+// controllo hash
 function controllo_hash(data) {
   const data_hash = `${data.amount},${data.sender},${data.reciver},${data.sender},${data.timestamp}`;
   const hash = crypto.createHash("sha256").update(data_hash, "utf-8").digest("hex");
-  return hash === data.TXid.hash;
+  return hash === data.TXid;
+}
+
+// controllo firma
+function signature(signature_transection, nonce, keys) {
+  const nonce_transection = Buffer.from(nonce.toString());
+
+  console.log(nonce_transection);
+  let signature = keys.sign(nonce_transection);
+  console.log(signature);
+  signature = signature.toDER("hex");
+  // console.log(signature);
+  console.log(signature_transection);
+
+  return signature_transection === signature;
 }
