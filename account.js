@@ -28,7 +28,7 @@ const public_key = keyPair.getPublic("hex");
   valore dispari 
 */
 
-console.log(`private key: ${private_key.toString("hex")}\npubblic key: ${public_key}`);
+// console.log(`private key: ${private_key.toString("hex")}\npubblic key: ${public_key}`);
 
 function process_address(PK) {
   // doppio hash e alla fine in base58 piu il prefisso per riconoscere l'address
@@ -47,4 +47,4 @@ function process_address(PK) {
 let nonce = 0;
 let balance = 1000;
 const address = process_address(public_key);
-exports.account = { private_key, keyPair, address, nonce, balance };
+exports.account = { private_key, keyPair, address, nonce, balance, public_key };
