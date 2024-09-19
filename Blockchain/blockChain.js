@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-const { account } = require("./account.js");
+const { account } = require("../account.js");
 const net = require("net");
 const server = new net.Socket();
 const dns = require("dns");
