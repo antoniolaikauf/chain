@@ -2,7 +2,7 @@
 const net = require("net"); // modulo per rete peer to peer
 let blockList = new net.BlockList(); // vedere se mettere regole specifiche tipo se prova a collegarsi più volte da quel ip
 const crypto = require("crypto");
-const { account } = require("../account.js");
+const { account } = require("../wallet/account.js");
 const EC = require("elliptic").ec;
 const ec = new EC("secp256k1"); // curva secp256k1
 

@@ -2,19 +2,35 @@ const crypto = require("crypto");
 const base58 = require("bs58").default;
 const EC = require("elliptic").ec;
 const ec = new EC("secp256k1"); // curva secp256k1
-
+var fs = require("fs");
 const max_ecdsa = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
+const path = require("path");
 
 function entropia() {
-  return crypto.randomBytes(32); // 128 bits entropia
+  return crypto.randomBytes(16); // 128 bits entropia
 }
 
+const path_bits = path.join(__dirname, "bits.json"); // percorso per bits randomici
+
 const valid_private_key = (n, b) => {
-  const private_key = crypto.createHash("sha256").update(b, "utf-8").digest();
-  const number_private_key = BigInt("0x" + private_key.toString("hex"));
-  if (1n <= number_private_key && number_private_key <= n)
-    return private_key; // 1n perchè si utilizza numeri troppo grandi per rappresentare numeri in js e se si fa un controllo tra bigint o n esce un errore
-  else valid_private_key(n, entropia());
+  let private_key = null;
+  if (fs.existsSync(path_bits)) { // file con bit entropia esistente
+    const file = require("./bits.json");
+    b = Buffer.from(file.bits, "hex");
+    private_key = crypto.createHash("sha256").update(b, "utf-8").digest();
+  } else {
+    private_key = crypto.createHash("sha256").update(b, "utf-8").digest();
+    const number_private_key = BigInt("0x" + private_key.toString("hex"));
+    if (1n <= number_private_key && number_private_key <= n) {
+      const bits = { bits: b };
+      const text = JSON.stringify(bits);
+      fs.writeFile("bits.json", text, (err, result) => { // crea file con private_key valida per la curva secp256k1
+        if (err) console.error("error", err);
+      });
+      // 1n perchè si utilizza numeri troppo grandi per rappresentare numeri in js e se si fa un controllo tra bigint o number esce un errore
+    } else valid_private_key(n, entropia());
+  }
+  return private_key;
 };
 
 const private_key = valid_private_key(max_ecdsa, entropia());
