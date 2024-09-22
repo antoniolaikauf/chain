@@ -25,10 +25,11 @@ const server = net.createServer((socket) => {
         controllo_hash(content) &&
         signature(content.nonce.nonce_transection, content.public_key, content.signature)
       ) {
-        console.log(content);
+        socket.write(JSON.stringify(content))
+        // console.log(content);
         console.log("transazione corretta");
       } // qua va il nonce dell'account
-      else throw Error("nonce non valido");
+      else throw Error(`${content.nonce.nonce_transection} non valido`);
     } else {
       console.log(`client collegati : ${clients.length}`);
       clients.forEach((element, i) => {

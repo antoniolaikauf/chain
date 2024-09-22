@@ -6,7 +6,6 @@ const dns = require("dns");
 const os = require("os");
 const options = { family: 4 };
 
-// VEDERE SE USARE IL TIPO DI FEE COME QUELLE DI ETH
 /*
   N.B. le variabili con funzioni sempre per ultime perchè se vengono inizializzate prima dellle
   variabili e alcune varibaili servono 
@@ -25,7 +24,7 @@ class Transection {
     this.fee_price = 0.5;
     this.timestamp = new Date().toLocaleString();
     this.txid = this.transection_id();
-    this.signature = this.signature_check(account.keyPair, account.private_key);
+    this.signature = this.signature_check(account.keyPair);
     // this.account_balance = account_balance;
   }
 
@@ -34,14 +33,14 @@ class Transection {
       nel secondo ci deve essere il nonce del sender cosi che il nonce di 
       quella transazione venga messa all'interno della transazione 
     */
-    let data = `${this.amount},${this.sender},${this.reciver},${this.sender},${this.timestamp}`;
+    let data = `${this.amount},${this.sender},${this.reciver},${this.nonce},${this.timestamp}`;
     const hash = crypto.createHash("sha256").update(data, "utf-8").digest("hex");
     this.nonce++;
     account.nonce++;
     return hash;
   }
 
-  signature_check(keys, p_k) {
+  signature_check(keys) {
     const nonce_transection = Buffer.from(account.nonce.toString()); // firma su nonce
     /*
       Non è necessario passare la chiave privata come argomento perché 
@@ -49,9 +48,7 @@ class Transection {
     */
     const signature = keys.sign(nonce_transection);
     const sign = signature.toDER("hex");
-    // console.log(keys);
     return signature;
-
   }
 
   send(cb_transection) {
@@ -89,17 +86,17 @@ class Transection {
 }
 
 class Block {
-  constructor(altezza, tx_root, nonce, timestamp, coinbase_transection, copy, target, reward, hash_prev, uncle) {
-    this.altezza = altezza;
+  constructor(tx_root, coinbase_transection, copy, target, reward, hash_prev, uncle) {
+    this.altezza = 0;
     this.tx_root = tx_root;
-    this.timestamp = timestamp;
+    this.timestamp = new Date().toLocaleString();
     this.coinbase_transection = coinbase_transection;
-    this.copy = copy;
+    this.copy = copy; // balance all account
     this.target = target;
     this.reward = reward;
     this.hash_prev = hash_prev;
-    this.uncle = uncle;
-    this.nonce = "nonce";
+    // this.uncle = uncle;
+    this.nonce = "nonce"; // pow
   }
 }
 
@@ -109,45 +106,38 @@ class BlockChain {
   }
 }
 
+class Mempool {
+  constructor() {
+    this.transections = new Set();
+  }
+
+  transection_add(TX) {
+    this.transections.add(TX);
+  }
+
+  get_transection(TX) {
+    for (const element of this.transections) {
+      if (element.txid === TX) return element
+      else console.log('transazione non presente');
+    }
+  }
+}
 let transection = new Transection(100, account.address, [" account ricevente"], 1, null);
 // let transection2 = new Transection(100, account.address, ["account ricevente", "account ricevente"], 0.00050051000000000000002, null);
-
-const verify_transection = {
-  TXid: transection.txid,
-  sender: transection.sender,
-  reciver: transection.reciver,
-  timestamp: transection.timestamp,
-  amount: transection.amount,
-  signature: transection.signature,
-  nonce: { nonce_transection: transection.nonce, nonce_account: account.nonce },
-  public_key: account.keyPair.getPublic('hex'),
-};
-
-exports.account = { verify_transection };
-
-// ottieni ip macchina
-dns.lookup(os.hostname(), options, (err, addr) => {
-  if (err) {
-    console.error(err);
-  } else {
-    server.connect(3000, addr, () => {
-      server.write(JSON.stringify(verify_transection));
-    });
-    setTimeout(() => {
-      server.destroy();
-    }, 100);
-  }
-});
 
 // transection.send();
 
 // transection2.send();
+/*
+prima di metterlo della mempool bisogna aspettare che tutti gli altri nodi 
+la verifichino e dopo si può mettere nella mempool 
+*/
+const mempool = new Mempool();
+mempool.transection_add(transection);
+console.log(mempool.get_transection(transection.txid)); // 
 
-let mempool = [];
 let block = new Block();
-
 let chain = new BlockChain(block);
-
 /*
 la trasmissione deve essere corretta e dopo verra trasmesa sulla rete gli altri nodi la controlleranno e se è valida verra 
 messa nella mempool 
@@ -160,10 +150,38 @@ messa nella mempool
 
 // transazione, quantità, address, feee, change
 
-// chiave privata e pubblica
-// creare wallet
-
 /*
 POW SI PUò FARE UGUALE A BITCOIN O ANCHE CHE DEVE TROVARE UN HASH DEL BLOCCCO CHE INIZZI CON 0000 USANDO UNO 
 SHA CON INPUT IL NONCE CHE è QUELLO CHE DEVE CAMBIARE I DATI E HEADER
 */
+
+const verify_transection = {
+  TXid: transection.txid,
+  sender: transection.sender,
+  reciver: transection.reciver,
+  timestamp: transection.timestamp,
+  amount: transection.amount,
+  signature: transection.signature,
+  nonce: { nonce_transection: transection.nonce, nonce_account: account.nonce },
+  public_key: account.keyPair.getPublic("hex"),
+};
+
+exports.account = { verify_transection };
+
+// ottieni ip macchina
+dns.lookup(os.hostname(), options, (err, addr) => {
+  if (err) {
+    console.error(err);
+  } else {
+    server.connect(3000, addr, () => {
+      server.write(JSON.stringify(verify_transection));
+    });
+    server.on("data", (data) => {
+      // TODO inviare i dati che sono arrivati dopo che la transazione è controllata a tutti i client
+      console.log(JSON.parse(data));
+    });
+    setTimeout(() => {
+      server.destroy();
+    }, 100);
+  }
+});
