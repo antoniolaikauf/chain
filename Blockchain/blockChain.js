@@ -36,8 +36,8 @@ class Transection {
     */
     let data = `${this.amount},${this.sender},${this.reciver},${this.sender},${this.timestamp}`;
     const hash = crypto.createHash("sha256").update(data, "utf-8").digest("hex");
-    this.nonce++
-    account.nonce++
+    this.nonce++;
+    account.nonce++;
     return hash;
   }
 
@@ -49,20 +49,18 @@ class Transection {
     */
     const signature = keys.sign(nonce_transection);
     const sign = signature.toDER("hex");
-    // console.log(sign);
-    return sign;
-    // const isValid = keys.verify(nonce_transection, sign);
-    // return isValid
+    // console.log(keys);
+    return signature;
+
   }
 
   send(cb_transection) {
     const fee_fixed = 21.0 * 1000 * 0.1e-8;
     const total_fee = fee_fixed + fee_fixed / this.reciver.length;
-    let index = 0
-    
+    let index = 0;
+
     // sistemare qua la verifica perche ora signature ha la firma ma non controlla se è corretta o no
 
-    
     if (this.signature === true) {
       if (this.sender < this.amount * this.reciver.length) throw new RangeError("error balance");
       else if (this.amount < 0) throw new Error("value amount wrong");
@@ -122,7 +120,7 @@ const verify_transection = {
   amount: transection.amount,
   signature: transection.signature,
   nonce: { nonce_transection: transection.nonce, nonce_account: account.nonce },
-  // key: account.keyPair,
+  public_key: account.keyPair.getPublic('hex'),
 };
 
 exports.account = { verify_transection };
