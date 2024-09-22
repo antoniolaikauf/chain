@@ -3,6 +3,8 @@ const net = require("net"); // modulo per rete peer to peer
 let blockList = new net.BlockList(); // vedere se mettere regole specifiche tipo se prova a collegarsi più volte da quel ip
 const crypto = require("crypto");
 const { account } = require("../account.js");
+const EC = require("elliptic").ec;
+const ec = new EC("secp256k1"); // curva secp256k1
 
 let clients = [];
 const server = net.createServer((socket) => {
@@ -17,17 +19,11 @@ const server = net.createServer((socket) => {
   // data dal client
   socket.on("data", (data) => {
     const content = JSON.parse(data.toString());
-    // SISTEMARE FIRMA PERCHE NON SONO UGUALI IN QUESTO MODO E QUANDO INVIO IL KEYPAIR NON è CORRETTO
-    // const nonce_transection = Buffer.from(content.TXid.nonce.toString());
-    // const i = account.keyPair.sign(nonce_transection)
-    // const t = i.toDER('hex')
-    // console.log(t);
-
     if ("TXid" in content) {
       if (
         controllo_nonce(content.nonce.nonce_transection, content.nonce.nonce_account) &&
-        controllo_hash(content)
-        // signature(content.signature, content.TXid.nonce, account.keyPair)
+        controllo_hash(content) &&
+        signature(content.nonce.nonce_transection, content.public_key, content.signature)
       ) {
         console.log(content);
         console.log("transazione corretta");
@@ -84,15 +80,8 @@ function controllo_hash(data) {
 }
 
 // controllo firma
-function signature(signature_transection, nonce, keys) {
+function signature(nonce, public_key, sign) {
   const nonce_transection = Buffer.from(nonce.toString());
-
-  console.log(nonce_transection);
-  let signature = keys.sign(nonce_transection);
-  console.log(signature);
-  signature = signature.toDER("hex");
-  // console.log(signature);
-  console.log(signature_transection);
-
-  return signature_transection === signature;
+  const is_valid = ec.keyFromPublic(public_key, "hex").verify(nonce_transection, sign);
+  return is_valid;
 }
