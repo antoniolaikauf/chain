@@ -86,10 +86,8 @@ class Transection {
 }
 
 class Block {
-  constructor(tx_root, coinbase_transection, copy, target, reward, hash_prev, uncle) {
+  constructor(transections, coinbase_transection, copy, target, reward, hash_prev, uncle) {
     this.altezza = 0;
-    this.tx_root = tx_root;
-    this.timestamp = new Date().toLocaleString();
     this.coinbase_transection = coinbase_transection;
     this.copy = copy; // balance all account
     this.target = target;
@@ -97,6 +95,8 @@ class Block {
     this.hash_prev = hash_prev;
     // this.uncle = uncle;
     this.nonce = "nonce"; // pow
+    this.tx_root = this.merkel_tree(transections);
+    this.timestamp = new Date().toLocaleString();
   }
 
   merkel_tree(TXS) {
@@ -115,12 +115,24 @@ class Block {
         }
         array_layer_hash.push(value);
       }
+      this.tx_root;
       return this.merkel_tree(array_layer_hash);
     }
   }
 
   hash_value(value) {
     return crypto.createHash("sha256").update(value, "utf-8").digest("hex");
+  }
+
+  block_data(TXS) {
+    let dati_block = { header: {}, data: {} };
+    dati_block.header["timestamp"] = this.timestamp;
+    dati_block.header["nonce"] = this.nonce;
+    dati_block.header["altezza"] = this.altezza;
+    dati_block.header["hash prev"] = this.hash_prev;
+    dati_block.header["target"] = this.target; // messo in bits il numero
+    dati_block.data["transazioni"] = TXS;
+    return dati_block;
   }
 }
 
@@ -148,13 +160,13 @@ class Mempool {
 }
 
 let transections = [
-  new Transection(100, account.address, ["account ricevente"], 1, null).transection_id(),
-  new Transection(100, account.address, ["account rivente"], 1, null).transection_id(),
-  new Transection(100, account.address, ["account"], 1, null).transection_id(),
-  new Transection(100, account.address, ["account ricevente"], 1, null).transection_id(),
-  new Transection(100, account.address, ["account cevente"], 1, null).transection_id(),
-  new Transection(100, account.address, ["accnt ricente"], 1, null).transection_id(),
-  new Transection(100, account.address, ["accnt rnte"], 1, null).transection_id(),
+  new Transection(100, account.address, ["account ricevente"], 1, null),
+  new Transection(100, account.address, ["account rivente"], 1, null),
+  new Transection(100, account.address, ["account"], 1, null),
+  new Transection(100, account.address, ["account ricevente"], 1, null),
+  new Transection(100, account.address, ["account cevente"], 1, null),
+  new Transection(100, account.address, ["accnt ricente"], 1, null),
+  new Transection(100, account.address, ["accnt rnte"], 1, null),
 ];
 
 // console.log(transections);
@@ -171,12 +183,15 @@ let transection = new Transection(100, account.address, ["account ricevente"], 1
 prima di metterlo della mempool bisogna aspettare che tutti gli altri nodi 
 la verifichino e dopo si può mettere nella mempool 
 */
+
 const mempool = new Mempool();
 mempool.transection_add(transection);
-console.log(mempool.get_transection(transection.txid)); //
+mempool.get_transection(transection.txid); //
 
-let block = new Block();
-console.log(block.merkel_tree(transections));
+let transections_hash = transections.map((element) => element.transection_id()); // ottieni l'hash delle transazioni
+let block = new Block(transections_hash);
+console.log(block.tx_root);
+console.log(JSON.stringify(block.block_data(transections), 2, null));
 
 let chain = new BlockChain(block);
 /*
