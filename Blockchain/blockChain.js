@@ -103,16 +103,20 @@ class Block {
     let array_layer_hash = [];
     if (TXS.length === 1) return TXS;
     else {
-      console.log(TXS);
-
-      for (let i = 0; i < Math.floor(TXS.length / 2); i++) {
+      let value;
+      for (let i = 0; i < TXS.length; i += 2) {
         let sha256_first = crypto.createHash("sha256").update(TXS[i], "utf-8").digest("hex");
-        let sha256_second = crypto
-          .createHash("sha256")
-          .update(TXS[i + 1], "utf-8")
-          .digest("hex");
-        let value = sha256_first.concat(sha256_second);
-        value = crypto.createHash("sha256").update(value, "utf-8").digest("hex");
+        if (i + 1 === TXS.length && TXS.length % 2 === 1) {
+          value = sha256_first;
+          console.log(value);
+        } else {
+          let sha256_second = crypto
+            .createHash("sha256")
+            .update(TXS[i + 1], "utf-8")
+            .digest("hex");
+          value = sha256_first.concat(sha256_second);
+          value = crypto.createHash("sha256").update(value, "utf-8").digest("hex");
+        }
         array_layer_hash.push(value);
       }
       return this.merkel_tree(array_layer_hash);
@@ -173,6 +177,7 @@ console.log(mempool.get_transection(transection.txid)); //
 
 let block = new Block();
 console.log(block.merkel_tree(transections));
+
 let chain = new BlockChain(block);
 /*
 la trasmissione deve essere corretta e dopo verra trasmesa sulla rete gli altri nodi la controlleranno e se è valida verra 
