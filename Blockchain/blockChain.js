@@ -100,16 +100,23 @@ class Block {
   }
 
   merkel_tree(TXS) {
-    for (let i = 0; i < Math.floor(TXS.length / 2); i++) {
-      let sha256_first = crypto.createHash("sha256").update(TXS[i].transection_id(), "utf-8").digest("hex");
-      let sha256_second = crypto
-        .createHash("sha256")
-        .update(TXS[i + 1].transection_id(), "utf-8")
-        .digest("hex");
-      let value = sha256_first.concat(sha256_second);
-      console.log(value);
+    let array_layer_hash = [];
+    if (TXS.length === 1) return TXS;
+    else {
+      console.log(TXS);
+
+      for (let i = 0; i < Math.floor(TXS.length / 2); i++) {
+        let sha256_first = crypto.createHash("sha256").update(TXS[i], "utf-8").digest("hex");
+        let sha256_second = crypto
+          .createHash("sha256")
+          .update(TXS[i + 1], "utf-8")
+          .digest("hex");
+        let value = sha256_first.concat(sha256_second);
+        value = crypto.createHash("sha256").update(value, "utf-8").digest("hex");
+        array_layer_hash.push(value);
+      }
+      return this.merkel_tree(array_layer_hash);
     }
-    console.log(hash_transections);
   }
 }
 
@@ -137,13 +144,13 @@ class Mempool {
 }
 
 let transections = [
-  new Transection(100, account.address, ["account ricevente"], 1, null),
-  new Transection(100, account.address, ["account rivente"], 1, null),
-  new Transection(100, account.address, ["account"], 1, null),
-  new Transection(100, account.address, ["account ricevente"], 1, null),
-  new Transection(100, account.address, ["account cevente"], 1, null),
-  new Transection(100, account.address, ["accnt ricente"], 1, null),
-  new Transection(100, account.address, ["accnt rnte"], 1, null),
+  new Transection(100, account.address, ["account ricevente"], 1, null).transection_id(),
+  new Transection(100, account.address, ["account rivente"], 1, null).transection_id(),
+  new Transection(100, account.address, ["account"], 1, null).transection_id(),
+  new Transection(100, account.address, ["account ricevente"], 1, null).transection_id(),
+  new Transection(100, account.address, ["account cevente"], 1, null).transection_id(),
+  new Transection(100, account.address, ["accnt ricente"], 1, null).transection_id(),
+  new Transection(100, account.address, ["accnt rnte"], 1, null).transection_id(),
 ];
 
 // console.log(transections);
@@ -165,7 +172,7 @@ mempool.transection_add(transection);
 console.log(mempool.get_transection(transection.txid)); //
 
 let block = new Block();
-block.merkel_tree(transections);
+console.log(block.merkel_tree(transections));
 let chain = new BlockChain(block);
 /*
 la trasmissione deve essere corretta e dopo verra trasmesa sulla rete gli altri nodi la controlleranno e se è valida verra 
