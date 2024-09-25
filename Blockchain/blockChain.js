@@ -101,26 +101,26 @@ class Block {
 
   merkel_tree(TXS) {
     let array_layer_hash = [];
-    if (TXS.length === 1) return TXS;
+    if (TXS.length === 1) return this.hash_value(TXS[0]);
     else {
       let value;
       for (let i = 0; i < TXS.length; i += 2) {
-        let sha256_first = crypto.createHash("sha256").update(TXS[i], "utf-8").digest("hex");
+        let sha256_first = this.hash_value(TXS[i]);
         if (i + 1 === TXS.length && TXS.length % 2 === 1) {
           value = sha256_first;
-          console.log(value);
         } else {
-          let sha256_second = crypto
-            .createHash("sha256")
-            .update(TXS[i + 1], "utf-8")
-            .digest("hex");
+          let sha256_second = this.hash_value(TXS[i + 1]);
           value = sha256_first.concat(sha256_second);
-          value = crypto.createHash("sha256").update(value, "utf-8").digest("hex");
+          value = this.hash_value(value);
         }
         array_layer_hash.push(value);
       }
       return this.merkel_tree(array_layer_hash);
     }
+  }
+
+  hash_value(value) {
+    return crypto.createHash("sha256").update(value, "utf-8").digest("hex");
   }
 }
 
