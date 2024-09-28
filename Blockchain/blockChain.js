@@ -82,6 +82,23 @@ class Transection {
       }
     } else throw Error("signature wrong");
   }
+
+  transection_data() {
+    /* Any remaining amount of bitcoin that isn't used up will be
+     claimed by a miner as the transaction fee.in bitcoin
+     */
+    const data = {
+      transection: this.transection_id(),
+      input: {},
+      output: {},
+      fee_need: this.fee_miner + ' cy',
+      fee_user: this.fee + ' cy',
+    };
+    data.input["sender"] = this.sender;
+    data.input["amount"] = this.amount;
+    data.output["reciver"] = this.reciver;
+    return data;
+  }
 }
 
 class Block {
@@ -183,6 +200,7 @@ let transection1 = new Transection(100, account.address, ["account rivente", "ty
 // let transection5 = new Transection(100, account.address, ["accnt ricente"], 1, null);
 // let transection2 = new Transection(100, account.address, ["account ricevente", "account ricevente"], 0.00050051000000000000002, null);
 
+
 /*
 prima di metterlo della mempool bisogna aspettare che tutti gli altri nodi 
 la verifichino e dopo si può mettere nella mempool 
@@ -200,7 +218,7 @@ console.log(transection.fee_miner);
 
 console.log(block.tx_root);
 console.log(block.cb_transection());
-
+console.log(transection.transection_data());
 // console.log(JSON.stringify(block.block_data(transections), 2, null));
 
 let chain = new BlockChain(block);
