@@ -108,12 +108,15 @@ class Block {
     let array_layer_hash = [];
     TXS.unshift(this.cb_transection());
     let value = 0;
+    //se transazioni sono dispari allora si dublica l'ultimo elemento
+    if (TXS.length % 2 === 1) TXS.push(TXS[TXS.length - 1]);
     while (TXS.length > 1) {
       array_layer_hash = TXS.map((element) => this.hash_value(element));
+      console.log(TXS);
+
       TXS = [];
       for (let i = 0; i < array_layer_hash.length; i += 2) {
-        if (array_layer_hash.length % 2 === 1 && i + 1 === array_layer_hash.length) value = array_layer_hash[i + 1];
-        else value = array_layer_hash[i].concat(array_layer_hash[i + 1]);
+        value = array_layer_hash[i].concat(array_layer_hash[i + 1]);
         const value_hash = this.hash_value(value);
         TXS.push(value_hash);
       }
@@ -198,7 +201,7 @@ console.log(transection.fee_miner);
 console.log(block.tx_root);
 console.log(block.cb_transection());
 
-console.log(JSON.stringify(block.block_data(transections), 2, null));
+// console.log(JSON.stringify(block.block_data(transections), 2, null));
 
 let chain = new BlockChain(block);
 /*
