@@ -12,13 +12,14 @@ const options = { family: 4 };
   all'interno della funzione ti darà undefined perchè vengono inizializzate dopo 
 */
 class Transection {
-  constructor(amount, sender, reciver, fee, looktime) {
+  // implementare looktime
+  constructor(amount, sender, reciver, fee) {
     // calcolare change se necessario
     this.amount = amount; // amount in go per fare un ci ci vuole 10000000
     this.sender = sender;
     this.reciver = reciver;
     this.fee = fee;
-    this.looktime = looktime;
+    this.fee_miner = 0;
     this.nonce = 0;
     this.status = "pending";
     this.fee_price = 0.5;
@@ -52,21 +53,22 @@ class Transection {
     return verify;
   }
 
-  send(cb_transection) {
-    const fee_fixed = 21.0 * 1000 * 0.1e-8;
-    const total_fee = fee_fixed + fee_fixed / this.reciver.length;
-    console.log(total_fee);
+  send() {
+    /* 1000000000 cyberini fanno 1 cy */
+    const fee_fixed = 21.0 * 1000 * 1e-9;
+    const total_fee = fee_fixed + (fee_fixed / 2) * (this.reciver.length - 1);
 
     let index = 0;
-
-    // sistemare qua la verifica perche ora signature ha la firma ma non controlla se è corretta o no
-
+    this.fee_miner += total_fee;
     if (this.signature === true) {
-      if (this.sender < this.amount * this.reciver.length) throw new RangeError("error balance");
+      // al posto di this.sender ci sarà il balance di chi invia i soldi
+      if (this.sender < this.amount * this.reciver.length) throw new RangeError("error balance ( not enough balance)");
       else if (this.amount < 0) throw new Error("value amount wrong");
       else if (total_fee > this.fee) {
-        this.error_fee(this.reciver, cb_transection);
+        throw Error("fee non enough");
       } else {
+        // togli le fee dall'account del sender
+        this.sender -= total_fee;
         /*
            se si ha solo un address allora si invierà la quantità a quello se se ne
            avranno di più allora si invierà la quantita a tutti gli address devi controllare il balance di ogni account 
@@ -80,21 +82,14 @@ class Transection {
       }
     } else throw Error("signature wrong");
   }
-
-  error_fee(account_user, address_miner) {
-    account_user -= this.fee;
-    address_miner += this.fee;
-    throw Error("fee non enough");
-  }
 }
 
 class Block {
-  constructor(transections, coinbase_transection, copy, target, hash_prev, uncle) {
+  constructor(transections, reward_transection, copy, target, hash_prev, uncle) {
     this.altezza = 0;
-    this.coinbase_transection = coinbase_transection;
     this.copy = copy; // balance all account
     this.target = target;
-    this.reward = 2;
+    this.reward = (2 + reward_transection) * 1e9; // cyberini
     this.hash_prev = hash_prev;
     // this.uncle = uncle;
     this.nonce = "nonce"; // pow
@@ -103,7 +98,7 @@ class Block {
   }
 
   cb_transection() {
-    const reward = this.reward;
+    const reward = Math.round(this.reward).toString(16);
     const TX = "0000000000000000000000000000000000000000000000000000000000000000";
   }
 
@@ -180,30 +175,29 @@ let transections = [
 // console.log(transections);
 
 let transection = new Transection(100, account.address, ["account ricevente"], 1, null);
-let transection1 = new Transection(100, account.address, ["account rivente"], 1, null);
+let transection1 = new Transection(100, account.address, ["account rivente", "tyre"], 1, null);
 // let transection2 = new Transection(100, account.address, ["account"], 1, null);
 // let transection3 = new Transection(100, account.address, ["account ricevente"], 1, null);
 // let transection4 = new Transection(100, account.address, ["account cevente"], 1, null);
 // let transection5 = new Transection(100, account.address, ["accnt ricente"], 1, null);
 // let transection2 = new Transection(100, account.address, ["account ricevente", "account ricevente"], 0.00050051000000000000002, null);
-console.log(transection.signature);
-console.log(transection1.signature);
-
-console.log(transection.send());
-// console.log(transection1.send());
 
 /*
 prima di metterlo della mempool bisogna aspettare che tutti gli altri nodi 
 la verifichino e dopo si può mettere nella mempool 
 */
+transection.send();
 
 const mempool = new Mempool();
 mempool.transection_add(transection);
 mempool.get_transection(transection.txid); //
 
 let transections_hash = transections.map((element) => element.transection_id()); // ottieni l'hash delle transazioni
-let block = new Block(transections_hash);
+let block = new Block(transections_hash, transection.fee_miner);
+console.log(transection.fee_miner);
+
 console.log(block.tx_root);
+console.log(block.cb_transection());
 
 console.log(JSON.stringify(block.block_data(transections), 2, null));
 
