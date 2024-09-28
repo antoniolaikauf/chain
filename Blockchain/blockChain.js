@@ -48,12 +48,15 @@ class Transection {
     */
     const signature = keys.sign(nonce_transection);
     const sign = signature.toDER("hex");
-    return signature;
+    const verify = keys.verify(nonce_transection, sign);
+    return verify;
   }
 
   send(cb_transection) {
     const fee_fixed = 21.0 * 1000 * 0.1e-8;
     const total_fee = fee_fixed + fee_fixed / this.reciver.length;
+    console.log(total_fee);
+
     let index = 0;
 
     // sistemare qua la verifica perche ora signature ha la firma ma non controlla se è corretta o no
@@ -86,17 +89,22 @@ class Transection {
 }
 
 class Block {
-  constructor(transections, coinbase_transection, copy, target, reward, hash_prev, uncle) {
+  constructor(transections, coinbase_transection, copy, target, hash_prev, uncle) {
     this.altezza = 0;
     this.coinbase_transection = coinbase_transection;
     this.copy = copy; // balance all account
     this.target = target;
-    this.reward = reward;
+    this.reward = 2;
     this.hash_prev = hash_prev;
     // this.uncle = uncle;
     this.nonce = "nonce"; // pow
     this.tx_root = this.merkel_tree(transections);
     this.timestamp = new Date().toLocaleString();
+  }
+
+  cb_transection() {
+    const reward = this.reward;
+    const TX = "0000000000000000000000000000000000000000000000000000000000000000";
   }
 
   merkel_tree(TXS) {
@@ -172,12 +180,17 @@ let transections = [
 // console.log(transections);
 
 let transection = new Transection(100, account.address, ["account ricevente"], 1, null);
-// let transection1 = new Transection(100, account.address, ["account rivente"], 1, null);
+let transection1 = new Transection(100, account.address, ["account rivente"], 1, null);
 // let transection2 = new Transection(100, account.address, ["account"], 1, null);
 // let transection3 = new Transection(100, account.address, ["account ricevente"], 1, null);
 // let transection4 = new Transection(100, account.address, ["account cevente"], 1, null);
 // let transection5 = new Transection(100, account.address, ["accnt ricente"], 1, null);
 // let transection2 = new Transection(100, account.address, ["account ricevente", "account ricevente"], 0.00050051000000000000002, null);
+console.log(transection.signature);
+console.log(transection1.signature);
+
+console.log(transection.send());
+// console.log(transection1.send());
 
 /*
 prima di metterlo della mempool bisogna aspettare che tutti gli altri nodi 
@@ -191,6 +204,7 @@ mempool.get_transection(transection.txid); //
 let transections_hash = transections.map((element) => element.transection_id()); // ottieni l'hash delle transazioni
 let block = new Block(transections_hash);
 console.log(block.tx_root);
+
 console.log(JSON.stringify(block.block_data(transections), 2, null));
 
 let chain = new BlockChain(block);
