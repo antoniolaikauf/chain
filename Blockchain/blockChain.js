@@ -15,7 +15,7 @@ class Transection {
   // implementare looktime
   constructor(amount, sender, reciver, fee) {
     // calcolare change se necessario
-    this.amount = amount; // amount in go per fare un ci ci vuole 10000000
+    this.amount = amount;
     this.sender = sender;
     this.reciver = reciver;
     this.fee = fee;
@@ -99,7 +99,9 @@ class Block {
 
   cb_transection() {
     const reward = Math.round(this.reward).toString(16);
-    const TX = "0000000000000000000000000000000000000000000000000000000000000000";
+    const TX_input = "C0000000000000000000000000000000000000000000000000000000000000000";
+    const TX_output = "address miner";
+    return TX_input + reward + TX_output;
   }
 
   merkel_tree(TXS) {
