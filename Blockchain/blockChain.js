@@ -106,23 +106,19 @@ class Block {
 
   merkel_tree(TXS) {
     let array_layer_hash = [];
-    if (TXS.length === 1) return this.hash_value(TXS[0]);
-    else {
-      let value;
-      for (let i = 0; i < TXS.length; i += 2) {
-        let sha256_first = this.hash_value(TXS[i]);
-        if (i + 1 === TXS.length && TXS.length % 2 === 1) {
-          value = sha256_first;
-        } else {
-          let sha256_second = this.hash_value(TXS[i + 1]);
-          value = sha256_first.concat(sha256_second);
-          value = this.hash_value(value);
-        }
-        array_layer_hash.push(value);
+    TXS.unshift(this.cb_transection());
+    let value = 0;
+    while (TXS.length > 1) {
+      array_layer_hash = TXS.map((element) => this.hash_value(element));
+      TXS = [];
+      for (let i = 0; i < array_layer_hash.length; i += 2) {
+        if (array_layer_hash.length % 2 === 1 && i + 1 === array_layer_hash.length) value = array_layer_hash[i + 1];
+        else value = array_layer_hash[i].concat(array_layer_hash[i + 1]);
+        const value_hash = this.hash_value(value);
+        TXS.push(value_hash);
       }
-      this.tx_root;
-      return this.merkel_tree(array_layer_hash);
     }
+    return TXS[0];
   }
 
   hash_value(value) {
@@ -192,9 +188,10 @@ transection.send();
 
 const mempool = new Mempool();
 mempool.transection_add(transection);
-mempool.get_transection(transection.txid); //
+mempool.get_transection(transection.txid);
 
 let transections_hash = transections.map((element) => element.transection_id()); // ottieni l'hash delle transazioni
+
 let block = new Block(transections_hash, transection.fee_miner);
 console.log(transection.fee_miner);
 
