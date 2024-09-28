@@ -26,7 +26,6 @@ const server = net.createServer((socket) => {
         signature(content.nonce.nonce_transection, content.public_key, content.signature)
       ) {
         socket.write(JSON.stringify(content))
-        // console.log(content);
         console.log("transazione corretta");
       } // qua va il nonce dell'account
       else throw Error(`${content.nonce.nonce_transection} non valido`);
