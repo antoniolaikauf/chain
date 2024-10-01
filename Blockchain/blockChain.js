@@ -166,7 +166,6 @@ class Block {
       this.nonce++;
       data += this.nonce.toString();
       this.hash_block = this.hash_value(data);
-      console.log(this.hash_block.slice(0, 3));
     }
     const time_end = performance.now();
     let time = (time_end - time_start) / 1000;
