@@ -67,12 +67,11 @@ class Transection {
       else if (total_fee > this.fee) {
         throw Error("fee non enough");
       } else {
-        // togli le fee dall'account del sender
-        this.sender -= total_fee;
-        /*
-           se si ha solo un address allora si invierà la quantità a quello se se ne
+        /* Se le fee dell'account sono in eccesso vanno ritornate.
+           Se si ha solo un address allora si invierà la quantità a quello se se ne
            avranno di più allora si invierà la quantita a tutti gli address devi controllare il balance di ogni account 
         */
+        this.sender -= total_fee;
         do {
           this.sender -= this.amount;
           this.reciver[index] += this.amount;
@@ -91,8 +90,8 @@ class Transection {
       transection: this.transection_id(),
       input: {},
       output: {},
-      fee_need: this.fee_miner + ' cy',
-      fee_user: this.fee + ' cy',
+      fee_need: this.fee_miner + " cy",
+      fee_user: this.fee + " cy",
     };
     data.input["sender"] = this.sender;
     data.input["amount"] = this.amount;
@@ -105,13 +104,14 @@ class Block {
   constructor(transections, reward_transection, copy, target, hash_prev, uncle) {
     this.altezza = 0;
     this.copy = copy; // balance all account
-    this.target = target;
+    this.target = "0".repeat(2);
     this.reward = (2 + reward_transection) * 1e9; // cyberini
     this.hash_prev = hash_prev;
     // this.uncle = uncle;
-    this.nonce = "nonce"; // pow
+    this.nonce = 0; // pow
     this.tx_root = this.merkel_tree(transections);
     this.timestamp = new Date().toLocaleString();
+    this.pow = "";
   }
 
   cb_transection() {
@@ -154,6 +154,16 @@ class Block {
     dati_block.header["target"] = this.target; // messo in bits il numero
     dati_block.data["transazioni"] = TXS;
     return dati_block;
+  }
+
+  POW() {
+    let data = `${this.tx_root}${this.timestamp}'precedente blocco'`;
+    while (!this.pow.startsWith(this.target)) {
+      this.nonce++;
+      data += this.nonce.toString();
+      this.pow = crypto.createHash("sha256").update(data, "utf-8").digest("hex");
+    }
+    return this.pow;
   }
 }
 
@@ -200,7 +210,6 @@ let transection1 = new Transection(100, account.address, ["account rivente", "ty
 // let transection5 = new Transection(100, account.address, ["accnt ricente"], 1, null);
 // let transection2 = new Transection(100, account.address, ["account ricevente", "account ricevente"], 0.00050051000000000000002, null);
 
-
 /*
 prima di metterlo della mempool bisogna aspettare che tutti gli altri nodi 
 la verifichino e dopo si può mettere nella mempool 
@@ -220,6 +229,8 @@ console.log(block.tx_root);
 console.log(block.cb_transection());
 console.log(transection.transection_data());
 // console.log(JSON.stringify(block.block_data(transections), 2, null));
+
+console.log(block.POW());
 
 let chain = new BlockChain(block);
 /*
