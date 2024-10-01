@@ -159,9 +159,12 @@ class Block {
   }
 
   POW() {
-    this.target = "0".repeat(this.time_value);
+    // pow 111 inizio hash
+    this.target = "1".repeat(this.time_value);
     const time_start = performance.now();
-    let data = `${this.tx_root}${this.timestamp}'precedente blocco'`;
+
+    let data = `${this.tx_root}${this.timestamp}'precedente blocco'${parseInt(this.target).toString(2)}`;
+
     while (!this.hash_block.startsWith(this.target)) {
       this.nonce++;
       data += this.nonce.toString();
@@ -175,7 +178,6 @@ class Block {
     */
     if (0 < time > 1) this.time_value = 4;
     else if (time > 20) this.time_value = 3;
-
     return this.hash_block;
   }
 }
@@ -293,3 +295,9 @@ dns.lookup(os.hostname(), options, (err, addr) => {
     }, 100);
   }
 });
+
+/* TODO
+ sistemare altezza ma penso che si ameglio provare a sisteare la rete e dopo l'altezza
+ altre caratterisiche si possono fare dopo 
+ sistemare collegamento rete 
+ */

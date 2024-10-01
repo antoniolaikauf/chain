@@ -8,8 +8,8 @@ const ec = new EC("secp256k1"); // curva secp256k1
 
 let clients = [];
 const server = net.createServer((socket) => {
-  // controllo e client gia connesso
   const client = { IP: socket.remoteAddress, data: socket };
+  // controllo e client gia connesso
   if (blockList.check(socket.remoteAddress)) {
     socket.destroy();
   } else {
