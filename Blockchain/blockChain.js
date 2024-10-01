@@ -4,6 +4,7 @@ const net = require("net");
 const server = new net.Socket();
 const dns = require("dns");
 const os = require("os");
+const { time } = require("console");
 const options = { family: 4 };
 
 /*
@@ -104,14 +105,15 @@ class Block {
   constructor(transections, reward_transection, copy, target, hash_prev, uncle) {
     this.altezza = 0;
     this.copy = copy; // balance all account
-    this.target = "0".repeat(2);
+    this.target = null;
     this.reward = (2 + reward_transection) * 1e9; // cyberini
     this.hash_prev = hash_prev;
     // this.uncle = uncle;
     this.nonce = 0; // pow
     this.tx_root = this.merkel_tree(transections);
     this.timestamp = new Date().toLocaleString();
-    this.pow = "";
+    this.hash_block = "";
+    this.time_value = 3;
   }
 
   cb_transection() {
@@ -157,13 +159,25 @@ class Block {
   }
 
   POW() {
+    this.target = "0".repeat(this.time_value);
+    const time_start = performance.now();
     let data = `${this.tx_root}${this.timestamp}'precedente blocco'`;
-    while (!this.pow.startsWith(this.target)) {
+    while (!this.hash_block.startsWith(this.target)) {
       this.nonce++;
       data += this.nonce.toString();
-      this.pow = crypto.createHash("sha256").update(data, "utf-8").digest("hex");
+      this.hash_block = this.hash_value(data);
+      console.log(this.hash_block.slice(0, 3));
     }
-    return this.pow;
+    const time_end = performance.now();
+    let time = (time_end - time_start) / 1000;
+    /*
+      time se troppo poco deve aumentare se troppo grande deve diminuire 
+      cosi da modificare la pow  
+    */
+    if (0 < time > 1) this.time_value = 4;
+    else if (time > 20) this.time_value = 3;
+
+    return this.hash_block;
   }
 }
 
