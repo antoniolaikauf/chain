@@ -14,22 +14,26 @@ const path_bits = path.join(__dirname, "bits.json"); // percorso per bits random
 
 const valid_private_key = (n, b) => {
   let private_key = null;
-  if (fs.existsSync(path_bits)) { // file con bit entropia esistente
+  if (fs.existsSync(path_bits)) {
+    // file con bit entropia esistente
     const file = require("./bits.json");
     b = Buffer.from(file.bits, "hex");
     private_key = crypto.createHash("sha256").update(b, "utf-8").digest();
   } else {
     private_key = crypto.createHash("sha256").update(b, "utf-8").digest();
     const number_private_key = BigInt("0x" + private_key.toString("hex"));
+    // 1n perchè si utilizza numeri troppo grandi per rappresentare numeri in js e se si fa un controllo tra bigint o number esce un errore
     if (1n <= number_private_key && number_private_key <= n) {
       const bits = { bits: b };
       const text = JSON.stringify(bits);
-      fs.writeFile("bits.json", text, (err, result) => { // crea file con private_key valida per la curva secp256k1
+      // crea file con private_key valida per la curva secp256k1
+      fs.writeFile("bits.json", text, (err, result) => {
         if (err) console.error("error", err);
       });
-      // 1n perchè si utilizza numeri troppo grandi per rappresentare numeri in js e se si fa un controllo tra bigint o number esce un errore
     } else valid_private_key(n, entropia());
   }
+  const seed = BigInt("0x" + b.toString("hex")); // seed
+  console.log(seed);
   return private_key;
 };
 
