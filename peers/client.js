@@ -32,14 +32,14 @@ listen_server.on("error", (err) => {
 
 listen_server.on("message", (msg, rinfo) => {
   // TODO PROVARE METODO MIGLIORE INVIANDO ARRAY E NON STRINGA
-  console.log(rinfo.address);
+  console.log(msg);
 
   if (!ip_address.includes(rinfo.address)) {
     ip_address += rinfo.address + ",";
     list_ip_address.add(rinfo.address);
     server_peer(list_ip_address);
     console.log(list_ip_address);
-    listen_server.send(Buffer.from(ip_address), port, address);
+    // listen_server.send(Buffer.from(ip_address), port, address);
   }
 });
 listen_server.bind(port);
@@ -47,10 +47,9 @@ listen_server.bind(port);
 // COLLEGAMENTO CLIENT
 function server_peer(IP_address) {
   IP_address.forEach((IP_element) => {
-    console.log(IP_element);
     const client = new net.Socket();
 
-    client.connect(3000, IP_element, () => {
+    client.connect(3000, "192.168.1.7", () => {
       console.log("client connesso");
       const peer = { peer: IP_element };
       client.write(JSON.stringify(peer));
@@ -62,8 +61,7 @@ function server_peer(IP_address) {
     });
     // errori
     client.on("error", (err) => {
-      console.log('errore');
-
+      console.log("errore");
       console.error(err.message);
     });
     // chiusura server
