@@ -15,12 +15,11 @@ const server = net.createServer((socket) => {
   //   socket.destroy();
   // } else {
   //   blockList.addAddress(socket.remoteAddress);
-  //   clients.push(client);
+  clients.push(client);
   // }
 
   // data dal client
   socket.on("data", (data) => {
-    console.log(data);
 
     const content = JSON.parse(data.toString());
     if ("TXid" in content) {
