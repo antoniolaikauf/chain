@@ -5,8 +5,6 @@ const { Buffer } = require("buffer");
 const dns = require("dns");
 const os = require("os");
 const options = { family: 4 };
-// const { transection_id } = require("../blockChain");
-// console.log(transection_id);
 
 const port = 41234;
 const address = "255.255.255.255";
@@ -20,7 +18,6 @@ listen_server.on("listening", () => {
       console.error(err);
     } else {
       listen_server.setBroadcast(true);
-      // console.log(`IPv4 address: ${addr}`);
       listen_server.send(Buffer.from(addr), port, address);
     }
   });
@@ -39,7 +36,7 @@ listen_server.on("message", (msg, rinfo) => {
     list_ip_address.add(rinfo.address);
     server_peer(rinfo.address);
     console.log(list_ip_address);
-    // listen_server.send(Buffer.from(ip_address), port, address);
+    listen_server.send(Buffer.from(ip_address), port, address);
   }
 });
 listen_server.bind(port);
