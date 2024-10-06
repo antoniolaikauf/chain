@@ -90,13 +90,14 @@ const { Socket } = require("socket.io-client");
 // }
 
 
+
 const server = net.createServer((socket) => {
-  socket.write('fffff')
-  socket.on('data',(data)=> {
+  socket.on('data', (data) => {
+    console.log(data.toString()); // Stampa il messaggio ricevuto
+  });
+});
 
-    console.log(data);
-    
-  })
-})
-
-server.listen(3000,'0.0.0.0')
+// Ascolta sulla porta 3000 e su tutte le interfacce
+server.listen(8080, '0.0.0.0', () => {
+  console.log('Server in ascolto sulla porta 3000');
+});
