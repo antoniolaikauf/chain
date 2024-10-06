@@ -4,7 +4,6 @@ const net = require("net");
 const server = new net.Socket();
 const dns = require("dns");
 const os = require("os");
-const { time } = require("console");
 const options = { family: 4 };
 
 /*
@@ -21,7 +20,7 @@ class Transection {
     this.reciver = reciver;
     this.fee = fee;
     this.fee_miner = 0;
-    this.nonce = 0;
+    this.nonce = account.nonce;
     this.status = "pending";
     this.fee_price = 0.5;
     this.timestamp = new Date().toLocaleString();
@@ -35,10 +34,10 @@ class Transection {
       nel secondo ci deve essere il nonce del sender cosi che il nonce di 
       quella transazione venga messa all'interno della transazione 
     */
-    let data = `${this.amount},${this.sender},${this.reciver},${this.nonce},${this.timestamp}`;
-    const hash = crypto.createHash("sha256").update(data, "utf-8").digest("hex");
     this.nonce++;
     account.nonce++;
+    let data = `${this.amount},${this.sender},${this.reciver},${this.nonce},${this.timestamp}`;
+    const hash = crypto.createHash("sha256").update(data, "utf-8").digest("hex");
     return hash;
   }
 
@@ -51,7 +50,8 @@ class Transection {
     const signature = keys.sign(nonce_transection);
     const sign = signature.toDER("hex");
     const verify = keys.verify(nonce_transection, sign);
-    return verify;
+    console.log(verify);
+    return sign;
   }
 
   send() {
@@ -88,11 +88,15 @@ class Transection {
      claimed by a miner as the transaction fee.in bitcoin
      */
     const data = {
-      transection: this.transection_id(),
+      TXid: transection.txid,
+      timestamp: transection.timestamp,
       input: {},
       output: {},
       fee_need: this.fee_miner + " cy",
       fee_user: this.fee + " cy",
+      signature: transection.signature,
+      nonce: { nonce_transection: transection.nonce, nonce_account: account.nonce },
+      public_key: account.keyPair.getPublic("hex"),
     };
     data.input["sender"] = this.sender;
     data.input["amount"] = this.amount;
@@ -162,7 +166,6 @@ class Block {
     // pow 111 inizio hash
     this.target = "1".repeat(this.time_value);
     const time_start = performance.now();
-
     let data = `${this.tx_root}${this.timestamp}'precedente blocco'${parseInt(this.target).toString(2)}`;
 
     while (!this.hash_block.startsWith(this.target)) {
@@ -218,7 +221,10 @@ let transections = [
 // console.log(transections);
 
 let transection = new Transection(100, account.address, ["account ricevente"], 1, null);
-let transection1 = new Transection(100, account.address, ["account rivente", "tyre"], 1, null);
+
+// console.log(transection.signature);
+// console.log(transection.transection_data());
+
 // let transection2 = new Transection(100, account.address, ["account"], 1, null);
 // let transection3 = new Transection(100, account.address, ["account ricevente"], 1, null);
 // let transection4 = new Transection(100, account.address, ["account cevente"], 1, null);
@@ -229,25 +235,17 @@ let transection1 = new Transection(100, account.address, ["account rivente", "ty
 prima di metterlo della mempool bisogna aspettare che tutti gli altri nodi 
 la verifichino e dopo si può mettere nella mempool 
 */
-transection.send();
 
-const mempool = new Mempool();
-mempool.transection_add(transection);
-mempool.get_transection(transection.txid);
+// const mempool = new Mempool();
+// mempool.transection_add(transection);
+// mempool.get_transection(transection.txid);
 
-let transections_hash = transections.map((element) => element.transection_id()); // ottieni l'hash delle transazioni
+// let transections_hash = transections.map((element) => element.transection_id()); // ottieni l'hash delle transazioni
 
-let block = new Block(transections_hash, transection.fee_miner);
-console.log(transection.fee_miner);
-
-console.log(block.tx_root);
-console.log(block.cb_transection());
-console.log(transection.transection_data());
-// console.log(JSON.stringify(block.block_data(transections), 2, null));
-
-console.log(block.POW());
-
-let chain = new BlockChain(block);
+// let block = new Block(transections_hash, transection.fee_miner);
+// console.log(block.tx_root);
+// console.log(block.cb_transection());
+// console.log(transection.transection_data());
 /*
 la trasmissione deve essere corretta e dopo verra trasmesa sulla rete gli altri nodi la controlleranno e se è valida verra 
 messa nella mempool 
@@ -265,29 +263,19 @@ POW SI PUò FARE UGUALE A BITCOIN O ANCHE CHE DEVE TROVARE UN HASH DEL BLOCCCO C
 SHA CON INPUT IL NONCE CHE è QUELLO CHE DEVE CAMBIARE I DATI E HEADER
 */
 
-const verify_transection = {
-  TXid: transection.txid,
-  sender: transection.sender,
-  reciver: transection.reciver,
-  timestamp: transection.timestamp,
-  amount: transection.amount,
-  signature: transection.signature,
-  nonce: { nonce_transection: transection.nonce, nonce_account: account.nonce },
-  public_key: account.keyPair.getPublic("hex"),
-};
-
-exports.account = { verify_transection };
-
+/*
+UDP è un protocollo di rete che consente l'invio di pacchetti 
+di dati tra host in una rete senza stabilire una connessione formale
+*/
 // ottieni ip macchina
 dns.lookup(os.hostname(), options, (err, addr) => {
   if (err) {
     console.error(err);
   } else {
-    server.connect(3000, addr, () => {
-      server.write(JSON.stringify(verify_transection));
+    server.connect(5000, addr, () => {
+      server.write(JSON.stringify(transection.transection_data()));
     });
     server.on("data", (data) => {
-      // TODO inviare i dati che sono arrivati dopo che la transazione è controllata a tutti i client
       console.log(JSON.parse(data));
     });
     setTimeout(() => {
