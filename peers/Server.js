@@ -18,8 +18,9 @@ const server = net.createServer((socket) => {
 
   // data dal client
   socket.on("data", (data) => {
-
     const content = JSON.parse(data.toString());
+    console.log(content);
+
     if ("TXid" in content) {
       if (
         controllo_nonce(content.nonce.nonce_transection, content.nonce.nonce_account) &&
@@ -29,7 +30,7 @@ const server = net.createServer((socket) => {
         socket.write(JSON.stringify(content));
         console.log("transazione corretta");
       } // qua va il nonce dell'account
-      else throw Error(`${content.nonce.nonce_transection} non valido`);
+      // else throw Error(`${content.nonce.nonce_transection} non valido`);
     } else {
       console.log(`client collegati : ${clients.length}`);
       clients.forEach((element, i) => {
