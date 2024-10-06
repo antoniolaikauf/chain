@@ -19,18 +19,16 @@ const server = net.createServer((socket) => {
   // data dal client
   socket.on("data", (data) => {
     const content = JSON.parse(data.toString());
-    console.log(content);
-
     if ("TXid" in content) {
       if (
-        controllo_nonce(content.nonce.nonce_transection, content.nonce.nonce_account) &&
+        controllo_nonce(content.nonce.nonce_transection + 1, content.nonce.nonce_account) &&
         controllo_hash(content) &&
         signature(content.nonce.nonce_transection, content.public_key, content.signature)
       ) {
         socket.write(JSON.stringify(content));
         console.log("transazione corretta");
       } // qua va il nonce dell'account
-      // else throw Error(`${content.nonce.nonce_transection} non valido`);
+      else 
     } else {
       console.log(`client collegati : ${clients.length}`);
       clients.forEach((element, i) => {
@@ -75,7 +73,7 @@ function controllo_nonce(nonce_transection, nonce_account) {
 }
 // controllo hash
 function controllo_hash(data) {
-  const data_hash = `${data.amount},${data.sender},${data.reciver},${data.sender},${data.timestamp}`;
+  const data_hash = `${data.input.amount},${data.input.sender},${data.output.reciver},${data.nonce.nonce_transection},${data.timestamp}`;
   const hash = crypto.createHash("sha256").update(data_hash, "utf-8").digest("hex");
   return hash === data.TXid;
 }
