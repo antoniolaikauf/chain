@@ -28,14 +28,15 @@ listen_server.on("error", (err) => {
 });
 
 listen_server.on("message", (msg, rinfo) => {
-  // TODO PROVARE METODO MIGLIORE INVIANDO ARRAY E NON STRINGA
-  console.log(rinfo.address);
-
   if (!ip_address.includes(rinfo.address)) {
     ip_address += rinfo.address + ",";
     list_ip_address.add(rinfo.address);
     server_peer(rinfo.address);
     console.log(list_ip_address);
+    console.log(rinfo.address, "address");
+    /* ogni volta che un nuovo ip si colleghi bisogna mandare un messaggio sulla 
+    rete cosi che tutti possano riceve gli IP e collegarsi 
+    */
     listen_server.send(Buffer.from(ip_address), port, address);
   }
 });
@@ -43,37 +44,36 @@ listen_server.bind(port);
 
 // COLLEGAMENTO CLIENT
 function server_peer(IP_address) {
-  console.log(IP_address, "address");
-    const client = new net.Socket();
+  const client = new net.Socket();
 
-    client.connect(5000, IP_address, () => {
-      console.log("client connesso");
-      const peer = { peer: IP_address };
-      client.write(JSON.stringify(peer));
+  client.connect(5000, IP_address, () => {
+    console.log("client connesso");
+    const peer = { peer: IP_address };
+    client.write(JSON.stringify(peer));
+  });
+  // data ottenuti
+  client.on("data", (data) => {
+    const text = data.toString("utf-8");
+    console.log(text);
+  });
+  // errori
+  client.on("error", (err) => {
+    console.log("errore");
+    console.error(err.message);
+  });
+  // chiusura server
+  client.on("end", () => {
+    console.log("CONNESSIONE CHIUSA");
+    process.exit(0);
+  });
+  // chiusura client forzata
+  process.on("SIGINT", () => {
+    console.log("connessione chiusa");
+    client.end(() => {
+      // dato tempo a client di chiudere la connessione
+      setTimeout(() => {
+        process.exit(0);
+      }, 100);
     });
-    // data ottenuti
-    client.on("data", (data) => {
-      const text = data.toString("utf-8");
-      console.log(text);
-    });
-    // errori
-    client.on("error", (err) => {
-      console.log("errore");
-      console.error(err.message);
-    });
-    // chiusura server
-    client.on("end", () => {
-      console.log("CONNESSIONE CHIUSA");
-      process.exit(0);
-    });
-    // chiusura client forzata
-    process.on("SIGINT", () => {
-      console.log("connessione chiusa");
-      client.end(() => {
-        // dato tempo a client di chiudere la connessione
-        setTimeout(() => {
-          process.exit(0);
-        }, 100);
-      });
-    });
+  });
 }
