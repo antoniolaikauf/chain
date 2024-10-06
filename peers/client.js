@@ -5,6 +5,7 @@ const { Buffer } = require("buffer");
 const dns = require("dns");
 const os = require("os");
 const options = { family: 4 };
+const { verifica } = require("../verify_transection/verifica.js");
 
 const port = 41234;
 const address = "255.255.255.255";
@@ -18,7 +19,8 @@ listen_server.on("listening", () => {
       console.error(err);
     } else {
       listen_server.setBroadcast(true);
-      listen_server.send(Buffer.from(addr), port, address);
+      let data = JSON.stringify({ ip: addr });
+      listen_server.send(Buffer.from(data), port, address);
     }
   });
 });
@@ -28,18 +30,29 @@ listen_server.on("error", (err) => {
 });
 
 listen_server.on("message", (msg, rinfo) => {
-  console.log(`Messaggio ricevuto: ${msg} da ${rinfo.address}:${rinfo.port}`);
+  let data = JSON.parse(msg);
+  console.log(data);
 
-  if (!ip_address.includes(rinfo.address)) {
-    ip_address += rinfo.address + ",";
+  if (!list_ip_address.has(rinfo.address)) {
     list_ip_address.add(rinfo.address);
     server_peer(rinfo.address);
     console.log(list_ip_address);
-    console.log(rinfo.address, "address");
+    console.log(`Messaggio ricevuto: ${msg} da ${rinfo.address}`);
     /* ogni volta che un nuovo ip si colleghi bisogna mandare un messaggio sulla 
     rete cosi che tutti possano riceve gli IP e collegarsi 
     */
-    listen_server.send(Buffer.from(ip_address), port, address);
+    let addr = JSON.stringify({ ip: rinfo.address });
+    listen_server.send(Buffer.from(addr), port, address);
+  } else if ("TXid" in data) {
+    if (
+      verifica.controllo_nonce(data.nonce.nonce_transection, data.nonce.nonce_account) &&
+      verifica.controllo_hash(data) &&
+      verifica.signature(data.nonce.nonce_transection, data.public_key, data.signature)
+    ) {
+      // transazione ottenuta e controllata
+      console.log("transazione corretta");
+    } // qua va il nonce dell'account
+    else console.log("transazione sbagliata");
   }
 });
 listen_server.bind(port);
