@@ -33,7 +33,7 @@ const valid_private_key = (n, b) => {
     } else valid_private_key(n, entropia());
   }
   const seed = BigInt("0x" + b.toString("hex")); // seed
-  console.log(seed);
+  // console.log(seed);
   return private_key;
 };
 

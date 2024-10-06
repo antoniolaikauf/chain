@@ -1,6 +1,6 @@
 const net = require("net"); // protocollo TCP/IP
 const dgram = require("dgram"); // UDP è un protocollo di rete che consente l'invio di pacchetti di dati tra host in una rete senza stabilire una connessione formale
-const listen_server = new dgram.createSocket("udp4");
+const listen_server = dgram.createSocket("udp4");
 const { Buffer } = require("buffer");
 const dns = require("dns");
 const os = require("os");
@@ -28,6 +28,8 @@ listen_server.on("error", (err) => {
 });
 
 listen_server.on("message", (msg, rinfo) => {
+  console.log(`Messaggio ricevuto: ${msg} da ${rinfo.address}:${rinfo.port}`);
+
   if (!ip_address.includes(rinfo.address)) {
     ip_address += rinfo.address + ",";
     list_ip_address.add(rinfo.address);

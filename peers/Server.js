@@ -1,34 +1,38 @@
 // // nesuna instanza socket con il server perchè il node crea un collegamento socket con il client collegato
 const net = require("net"); // modulo per rete peer to peer
-// let blockList = new net.BlockList(); // vedere se mettere regole specifiche tipo se prova a collegarsi più volte da quel ip
 const crypto = require("crypto");
-const EC = require("elliptic").ec;
-const ec = new EC("secp256k1"); // curva secp256k1
+const dgram = require("dgram");
+const sender = dgram.createSocket("udp4");
+const {verifica} = require("../verify_transection/verifica.js");
 
 let clients = [];
 const server = net.createServer((socket) => {
   const client = { IP: socket.remoteAddress, data: socket };
-  // controllo e client gia connesso
-  // if (blockList.check(socket.remoteAddress)) {
-  //   socket.destroy();
-  // } else {
-  //   blockList.addAddress(socket.remoteAddress);
   clients.push(client);
-  // }
 
   // data dal client
   socket.on("data", (data) => {
     const content = JSON.parse(data.toString());
     if ("TXid" in content) {
       if (
-        controllo_nonce(content.nonce.nonce_transection + 1, content.nonce.nonce_account) &&
-        controllo_hash(content) &&
-        signature(content.nonce.nonce_transection, content.public_key, content.signature)
+        verifica.controllo_nonce(content.nonce.nonce_transection, content.nonce.nonce_account) &&
+        verifica.controllo_hash(content) &&
+        verifica.signature(content.nonce.nonce_transection, content.public_key, content.signature)
       ) {
+        //inviare transazione sulla rete
+        const port = 41234;
+        const address = "255.255.255.255";
+        sender.bind(() => {
+          sender.setBroadcast(true);
+          sender.send(Buffer.from(JSON.stringify(content)), port, address);
+          setTimeout(() => {
+            sender.close();
+          }, 100);
+        });
         socket.write(JSON.stringify(content));
         console.log("transazione corretta");
       } // qua va il nonce dell'account
-      else 
+      else console.log("transazione sbagliata");
     } else {
       console.log(`client collegati : ${clients.length}`);
       clients.forEach((element, i) => {
@@ -40,11 +44,6 @@ const server = net.createServer((socket) => {
   // client disconnessione
   socket.on("end", function () {
     clients = clients.filter((element) => element.IP != socket.remoteAddress);
-    // let new_blocklist = new net.BlockList();
-    // clients.forEach((element) => {
-    //   new_blocklist.addAddress(element);
-    // });
-    // blockList = new_blocklist; // blocklist con solo address che hanno il permesso
     console.log(`client: ${socket.remoteAddress} scollegato\nclients collegati ${clients.length}`);
   });
   // errori
@@ -67,20 +66,3 @@ process.on("SIGINT", () => {
 
   if (clients.length === 0) process.exit(0);
 });
-
-function controllo_nonce(nonce_transection, nonce_account) {
-  return nonce_transection === nonce_account;
-}
-// controllo hash
-function controllo_hash(data) {
-  const data_hash = `${data.input.amount},${data.input.sender},${data.output.reciver},${data.nonce.nonce_transection},${data.timestamp}`;
-  const hash = crypto.createHash("sha256").update(data_hash, "utf-8").digest("hex");
-  return hash === data.TXid;
-}
-
-// controllo firma
-function signature(nonce, public_key, sign) {
-  const nonce_transection = Buffer.from(nonce.toString());
-  const is_valid = ec.keyFromPublic(public_key, "hex").verify(nonce_transection, sign);
-  return is_valid;
-}
