@@ -1,7 +1,7 @@
 // // nesuna instanza socket con il server perchè il node crea un collegamento socket con il client collegato
 const net = require("net"); // modulo per rete peer to peer
 const { Socket } = require("socket.io-client");
-let blockList = new net.BlockList(); // vedere se mettere regole specifiche tipo se prova a collegarsi più volte da quel ip
+// let blockList = new net.BlockList(); // vedere se mettere regole specifiche tipo se prova a collegarsi più volte da quel ip
 const crypto = require("crypto");
 // const { account } = require("../wallet/account.js");
 const EC = require("elliptic").ec;
@@ -11,12 +11,13 @@ let clients = [];
 const server = net.createServer((socket) => {
   const client = { IP: socket.remoteAddress, data: socket };
   // controllo e client gia connesso
-  if (blockList.check(socket.remoteAddress)) {
-    socket.destroy();
-  } else {
-    blockList.addAddress(socket.remoteAddress);
-    clients.push(client);
-  }
+  // if (blockList.check(socket.remoteAddress)) {
+  //   socket.destroy();
+  // } else {
+  //   blockList.addAddress(socket.remoteAddress);
+  //   clients.push(client);
+  // }
+
   // data dal client
   socket.on("data", (data) => {
     console.log(data);
@@ -88,17 +89,3 @@ function signature(nonce, public_key, sign) {
   const is_valid = ec.keyFromPublic(public_key, "hex").verify(nonce_transection, sign);
   return is_valid;
 }
-
-
-
-// const server = net.createServer((socket) => {
-
-//   socket.on('data', (data) => {
-//     console.log(data.toString()); // Stampa il messaggio ricevuto
-//   });
-// });
-
-// // Ascolta sulla porta 3000 e su tutte le interfacce
-// server.listen(5000, '0.0.0.0', () => {
-//   console.log('Server in ascolto sulla porta 3000');
-// });

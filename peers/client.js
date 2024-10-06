@@ -47,8 +47,6 @@ listen_server.bind(port);
 // COLLEGAMENTO CLIENT
 function server_peer(IP_address) {
   console.log(IP_address, "address");
-
-  // IP_address.forEach((IP_element) => {
     const client = new net.Socket();
 
     client.connect(5000, IP_address, () => {
@@ -81,15 +79,4 @@ function server_peer(IP_address) {
         }, 100);
       });
     });
-  // });
 }
-
-// const client = new net.Socket();
-
-// client.connect(5000, "192.168.38.88", () => {
-//   client.write("hfhfhfhfhfh");
-// });
-
-// client.on('error', (err) => {
-//   console.error('Errore:', err.message);
-// });
