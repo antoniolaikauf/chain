@@ -3,7 +3,16 @@ const net = require("net"); // modulo per rete peer to peer
 const crypto = require("crypto");
 const dgram = require("dgram");
 const sender = dgram.createSocket("udp4");
-const {verifica} = require("../verify_transection/verifica.js");
+const { verifica } = require("../verify_transection/verifica.js");
+
+// sistemare meglio questo deciso di lasciare sempre aperto ed è la rete per le transazioni
+
+const port = 41234;
+const address = "255.255.255.255";
+
+sender.bind(() => {
+  sender.setBroadcast(true);
+});
 
 let clients = [];
 const server = net.createServer((socket) => {
@@ -20,15 +29,7 @@ const server = net.createServer((socket) => {
         verifica.signature(content.nonce.nonce_transection, content.public_key, content.signature)
       ) {
         //inviare transazione sulla rete
-        const port = 41234;
-        const address = "255.255.255.255";
-        sender.bind(() => {
-          sender.setBroadcast(true);
-          sender.send(Buffer.from(JSON.stringify(content)), port, address);
-          setTimeout(() => {
-            sender.close();
-          }, 100);
-        });
+        sender.send(Buffer.from(JSON.stringify(content)), port, address);
         socket.write(JSON.stringify(content));
         console.log("transazione corretta");
       } // qua va il nonce dell'account
@@ -38,7 +39,7 @@ const server = net.createServer((socket) => {
       clients.forEach((element, i) => {
         console.log(`client ${element.IP} connesso`);
       });
-      socket.write(`Benvenuto ${socket.remoteAddress}`);
+      // socket.write(`Benvenuto ${socket.remoteAddress}`);
     }
   });
   // client disconnessione
@@ -51,7 +52,7 @@ const server = net.createServer((socket) => {
     console.error(`Socket error: ${err.message}`);
   });
 });
-// porta 3000 indirizzi di ascolto tutti 0.0.0.0
+// porta 5000 indirizzi di ascolto tutti 0.0.0.0
 server.listen(5000, "0.0.0.0", () => {
   console.log(`server dati: ${JSON.stringify(server.address())}`);
 });

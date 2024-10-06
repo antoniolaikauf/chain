@@ -31,8 +31,6 @@ listen_server.on("error", (err) => {
 
 listen_server.on("message", (msg, rinfo) => {
   let data = JSON.parse(msg);
-  console.log(data);
-
   if (!list_ip_address.has(rinfo.address)) {
     list_ip_address.add(rinfo.address);
     server_peer(rinfo.address);

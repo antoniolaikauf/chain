@@ -280,9 +280,14 @@ dns.lookup(os.hostname(), options, (err, addr) => {
     });
     setTimeout(() => {
       server.destroy();
-    }, 100);
+    }, 500);
   }
 });
+
+/*
+TODO VEDERE SE è IL SETTIMEOUT SOPRA IL PROBLEMA PERCHè MI SI DISCONETTE SE LO LASCIO E SE INVIO UN ALTRA TRANSAZIONE
+MI DA ERRORE SE LO TOLGO NON MI SI DISCONETTE IL CLIENT 
+*/
 
 /* TODO
  sistemare altezza ma penso che si ameglio provare a sisteare la rete e dopo l'altezza
