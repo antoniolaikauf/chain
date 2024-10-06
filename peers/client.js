@@ -32,6 +32,8 @@ listen_server.on("error", (err) => {
 
 listen_server.on("message", (msg, rinfo) => {
   // TODO PROVARE METODO MIGLIORE INVIANDO ARRAY E NON STRINGA
+  console.log(rinfo.address);
+
   if (!ip_address.includes(rinfo.address)) {
     ip_address += rinfo.address + ",";
     list_ip_address.add(rinfo.address);
@@ -50,7 +52,7 @@ function server_peer(IP_address) {
 
     client.connect(3000, IP_element, () => {
       console.log("client connesso");
-      const peer = { peer : IP_element };
+      const peer = { peer: IP_element };
       client.write(JSON.stringify(peer));
     });
     // data ottenuti
@@ -60,6 +62,8 @@ function server_peer(IP_address) {
     });
     // errori
     client.on("error", (err) => {
+      console.log('errore');
+
       console.error(err.message);
     });
     // chiusura server
