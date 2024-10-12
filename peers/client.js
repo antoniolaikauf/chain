@@ -6,6 +6,7 @@ const dns = require("dns");
 const os = require("os");
 const options = { family: 4 };
 const { verifica } = require("../verify_transection/verifica.js");
+let { mempool } = require("../Mempool/Mempool.js");
 
 const port = 41234;
 const address = "255.255.255.255";
@@ -47,6 +48,9 @@ listen_server.on("message", (msg, rinfo) => {
       verifica.signature(data.nonce.nonce_transection, data.public_key, data.signature)
     ) {
       // transazione ottenuta e controllata
+      mempool.add_transection(data);
+      console.log(mempool.Mempool);
+
       console.log("transazione corretta");
     } // qua va il nonce dell'account
     else console.log("transazione sbagliata");

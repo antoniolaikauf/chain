@@ -1,6 +1,5 @@
 // // nesuna instanza socket con il server perchè il node crea un collegamento socket con il client collegato
 const net = require("net"); // modulo per rete peer to peer
-const crypto = require("crypto");
 const dgram = require("dgram");
 const sender = dgram.createSocket("udp4");
 const { verifica } = require("../verify_transection/verifica.js");
