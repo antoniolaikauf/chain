@@ -119,7 +119,7 @@ class Block {
     this.hash_block = "";
     this.time_value = 3;
   }
-
+  // coinbase_transection
   cb_transection() {
     const reward = Math.round(this.reward).toString(16);
     const TX_input = "C0000000000000000000000000000000000000000000000000000000000000000";
@@ -129,7 +129,7 @@ class Block {
 
   merkel_tree(TXS) {
     let array_layer_hash = [];
-    TXS.unshift(this.cb_transection());
+    TXS.unshift(this.cb_transection()); // si aggiunge a coinbase transection come prima transazione
     let value = 0;
     //se transazioni sono dispari allora si dublica l'ultimo elemento
     if (TXS.length % 2 === 1) TXS.push(TXS[TXS.length - 1]);
@@ -285,7 +285,7 @@ dns.lookup(os.hostname(), options, (err, addr) => {
   }
 });
 
-// transazione dopo che è stata verificata dai nodi viene messa dentro alla mempool 
+// transazione dopo che è stata verificata dai nodi viene messa dentro alla mempool
 
 /* TODO
  sistemare altezza ma penso che si ameglio provare a sisteare la rete e dopo l'altezza

@@ -49,8 +49,7 @@ listen_server.on("message", (msg, rinfo) => {
     ) {
       // transazione ottenuta e controllata
       mempool.add_transection(data);
-      console.log(mempool.Mempool);
-
+      console.log(mempool.sort_Mempool(mempool.Mempool));
       console.log("transazione corretta");
     } // qua va il nonce dell'account
     else console.log("transazione sbagliata");
