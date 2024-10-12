@@ -204,8 +204,6 @@ let transections = [
   new Transection(100, address_wallet, ["accnt rnte"], 20, null),
 ];
 
-console.log(transections);
-
 // let transection = new Transection(100, account.address, ["account ricevente"], 1, null);
 
 /*
@@ -250,7 +248,6 @@ dns.lookup(os.hostname(), options, (err, addr) => {
       if (index === transections.length) index = 0;
       server.connect(5000, addr, () => {
         server.write(JSON.stringify(transections[index].transection_data()));
-        console.log(transections[index].transection_data());
         index++;
       });
       server.on("data", (data) => {

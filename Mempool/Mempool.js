@@ -4,30 +4,32 @@ function add_transection(transection) {
   Mempool.add(transection);
 }
 
+function merge_array(left, right) {
+  let array_sorted = [];
+  let leftIndex = 0;
+  let rightIndex = 0;
+  while (leftIndex < left.length && rightIndex < right.length) {
+    if (left[leftIndex].fee_user > right[rightIndex].fee_user) {
+      array_sorted.push(right[rightIndex]);
+      rightIndex++;
+    } else {
+      array_sorted.push(left[leftIndex]);
+      leftIndex++;
+    }
+  }
+  const data = array_sorted.concat(left.slice(leftIndex)).concat(right.slice(rightIndex));
+  return data;
+}
+
 function sort_Mempool(transactions) {
-  if ((transactions.size = 1)) return transactions;
-  const half = Math.floor(transactions.size / 2);
-  const array_left = Array.from(transactions).slice(0, half);
-  const array_right = Array.from(transactions).slice(half);
-  console.log(array_left, array_right);
-  //   sort_Mempool(array_left), sort_Mempool(array_right)
+  let TRANSECTIONS = Array.from(transactions);
+  if (TRANSECTIONS.length === 1) {
+    return transactions;
+  }
+  const half = Math.floor(TRANSECTIONS.length / 2);
+  const array_left = TRANSECTIONS.slice(0, half);
+  const array_right = TRANSECTIONS.slice(half);
   return merge_array(sort_Mempool(array_left), sort_Mempool(array_right));
 }
 
-function merge_array(left, right) {
-  let array_sorted = [];
-  for (let i = 0; i < left.length - 1; i++) {
-    if (left[i].fee_user > left[i + 1].fee_user) {
-      left[i] = left[i + 1];
-      left[i + 1] = left[i];
-    }
-  }
-  for (let i = 0; i < right.length - 1; i++) {
-    if (right[i].fee_user > right[i + 1].fee_user) {
-      right[i] = right[i + 1];
-      right[i + 1] = right[i];
-    }
-  }
-  return [...left, ...right];
-}
 exports.mempool = { Mempool, add_transection, sort_Mempool };

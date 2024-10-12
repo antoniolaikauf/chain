@@ -18,7 +18,7 @@ const server = net.createServer((socket) => {
   // data dal client
   socket.on("data", (data) => {
     const content = JSON.parse(data.toString());
-    console.log(content);
+    // console.log(content);
 
     if ("TXid" in content) {
       if (verifica.controllo_hash(content) && verifica.signature(content.nonce.nonce_transection, content.public_key, content.signature)) {

@@ -42,14 +42,10 @@ listen_server.on("message", (msg, rinfo) => {
     let addr = JSON.stringify({ ip: rinfo.address });
     listen_server.send(Buffer.from(addr), port, address);
   } else if ("TXid" in data) {
-    if (
-      verifica.controllo_nonce(data.nonce.nonce_transection, data.nonce.nonce_account) &&
-      verifica.controllo_hash(data) &&
-      verifica.signature(data.nonce.nonce_transection, data.public_key, data.signature)
-    ) {
+    if (verifica.controllo_hash(data) && verifica.signature(data.nonce.nonce_transection, data.public_key, data.signature)) {
       // transazione ottenuta e controllata
-      // mempool.add_transection(data);
-      // console.log(mempool.sort_Mempool(mempool.Mempool));
+      mempool.add_transection(data);
+      console.log(mempool.sort_Mempool(mempool.Mempool));
       console.log("transazione corretta");
     } // qua va il nonce dell'account
     else console.log("transazione sbagliata");
