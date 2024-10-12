@@ -3,7 +3,7 @@ const net = require("net"); // modulo per rete peer to peer
 const dgram = require("dgram");
 const sender = dgram.createSocket("udp4");
 const { verifica } = require("../verify_transection/verifica.js");
-let { private_key, keyPair, address_wallet, nonce, balance, public_key } = require("../wallet/account.js");
+let { nonce } = require("../wallet/account.js");
 // sistemare meglio questo deciso di lasciare sempre aperto ed è la rete per le transazioni
 
 const port = 41234;

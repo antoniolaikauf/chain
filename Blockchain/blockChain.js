@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-let { private_key, keyPair, address_wallet, nonce, balance, public_key } = require("../wallet/account.js");
+let { keyPair, address_wallet, nonce } = require("../wallet/account.js");
 const net = require("net");
 const server = new net.Socket();
 const dns = require("dns");
