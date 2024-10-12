@@ -272,6 +272,7 @@ dns.lookup(os.hostname(), options, (err, addr) => {
   if (err) {
     console.error(err);
   } else {
+    const server = new net.Socket();
     server.connect(5000, addr, () => {
       server.write(JSON.stringify(transection.transection_data()));
     });

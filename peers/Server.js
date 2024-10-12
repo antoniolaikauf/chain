@@ -16,12 +16,11 @@ sender.bind(() => {
 
 let clients = [];
 const server = net.createServer((socket) => {
-  const client = { IP: socket.remoteAddress, data: socket };
-  clients.push(client);
-
   // data dal client
   socket.on("data", (data) => {
     const content = JSON.parse(data.toString());
+    console.log(content);
+
     if ("TXid" in content) {
       if (
         verifica.controllo_nonce(content.nonce.nonce_transection, content.nonce.nonce_account) &&
@@ -35,6 +34,8 @@ const server = net.createServer((socket) => {
       } // qua va il nonce dell'account
       else console.log("transazione sbagliata");
     } else {
+      const client = { IP: socket.remoteAddress, data: socket, transection: false };
+      clients.push(client);
       console.log(`client collegati : ${clients.length}`);
       clients.forEach((element, i) => {
         console.log(`client ${element.IP} connesso`);
@@ -44,8 +45,11 @@ const server = net.createServer((socket) => {
   });
   // client disconnessione
   socket.on("end", function () {
-    clients = clients.filter((element) => element.IP != socket.remoteAddress);
-    console.log(`client: ${socket.remoteAddress} scollegato\nclients collegati ${clients.length}`);
+    // mostra solo quando è una connessione tra server e client, senza transazione
+    if (clients[clients.length - 1].transection) {
+      clients = clients.filter((element) => element.IP != socket.remoteAddress);
+      console.log(`client: ${socket.remoteAddress} scollegato\nclients collegati ${clients.length}`);
+    }
   });
   // errori
   socket.on("error", (err) => {

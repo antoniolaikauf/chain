@@ -9,7 +9,6 @@ const { verifica } = require("../verify_transection/verifica.js");
 
 const port = 41234;
 const address = "255.255.255.255";
-let ip_address = "";
 let list_ip_address = new Set(); //vedere come mai mi dice connessione quando metto dentro '127.0.0.1' nel set anche se dopo nel server si connette solo uno
 
 listen_server.on("listening", () => {
