@@ -3,7 +3,7 @@ const net = require("net"); // modulo per rete peer to peer
 const dgram = require("dgram");
 const sender = dgram.createSocket("udp4");
 const { verifica } = require("../verify_transection/verifica.js");
-const { account } = require("../wallet/account.js");
+let { private_key, keyPair, address_wallet, nonce, balance, public_key } = require("../wallet/account.js");
 // sistemare meglio questo deciso di lasciare sempre aperto ed è la rete per le transazioni
 
 const port = 41234;
@@ -18,13 +18,12 @@ const server = net.createServer((socket) => {
   // data dal client
   socket.on("data", (data) => {
     const content = JSON.parse(data.toString());
-    // console.log(content);
+    console.log(content);
 
     if ("TXid" in content) {
       if (verifica.controllo_hash(content) && verifica.signature(content.nonce.nonce_transection, content.public_key, content.signature)) {
         //inviare transazione sulla rete
-        account.nonce++;
-        console.log(account.nonce);
+        nonce++;
         sender.send(Buffer.from(JSON.stringify(content)), port, address);
         socket.write(JSON.stringify(content));
         console.log("transazione corretta");

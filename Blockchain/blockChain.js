@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-const { account } = require("../wallet/account.js");
+let { private_key, keyPair, address_wallet, nonce, balance, public_key } = require("../wallet/account.js");
 const net = require("net");
 const server = new net.Socket();
 const dns = require("dns");
@@ -19,14 +19,17 @@ class Transection {
     this.sender = sender;
     this.reciver = reciver;
     this.fees = fees;
-    this.nonce = account.nonce;
+    this.nonce = nonce;
     this.status = "pending";
     this.fee_price = 0.5;
     this.fee_miner = this.fee_miner(); // reward
     this.timestamp = new Date().toLocaleString();
     this.txid = this.transection_id();
-    this.signature = this.signature_check(account.keyPair);
-    // this.account_balance = account_balance;
+    this.signature = this.signature_check(keyPair);
+    /* bisogna per forza incrementarlo anche qua perchè js non lo incrementa globalmente ma localmente 
+     nel file l'incremento del nonce c'è anche nel file server   
+     */
+    nonce++;
   }
 
   transection_id() {
@@ -40,7 +43,7 @@ class Transection {
   }
 
   signature_check(keys) {
-    const nonce_transection = Buffer.from(account.nonce.toString()); // firma su nonce
+    const nonce_transection = Buffer.from(nonce.toString()); // firma su nonce
     /*
       Non è necessario passare la chiave privata come argomento perché 
       l'oggetto KeyPair sa già quale chiave utilizzare internamente.
@@ -96,7 +99,7 @@ class Transection {
       fee_user: this.fees, // in cy
       signature: this.signature,
       nonce: { nonce_transection: this.nonce },
-      public_key: account.keyPair.getPublic("hex"),
+      public_key: keyPair.getPublic("hex"),
     };
     data.input["sender"] = this.sender;
     data.input["amount"] = this.amount;
@@ -192,13 +195,13 @@ class BlockChain {
 }
 
 let transections = [
-  new Transection(100, account.address, ["account ricevente"], 1, null),
-  new Transection(100, account.address, ["account rivente"], 15, null),
-  new Transection(100, account.address, ["account"], 3, null),
-  new Transection(100, account.address, ["account ricevente"], 32, null),
-  new Transection(100, account.address, ["account cevente"], 45, null),
-  new Transection(100, account.address, ["accnt ricente"], 50, null),
-  new Transection(100, account.address, ["accnt rnte"], 20, null),
+  new Transection(100, address_wallet, ["account ricevente"], 1, null),
+  new Transection(100, address_wallet, ["account rivente"], 15, null),
+  new Transection(100, address_wallet, ["account"], 3, null),
+  new Transection(100, address_wallet, ["account ricevente"], 32, null),
+  new Transection(100, address_wallet, ["account cevente"], 45, null),
+  new Transection(100, address_wallet, ["accnt ricente"], 50, null),
+  new Transection(100, address_wallet, ["accnt rnte"], 20, null),
 ];
 
 console.log(transections);

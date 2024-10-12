@@ -66,5 +66,5 @@ function process_address(PK) {
 
 let nonce = 0;
 let balance = 1000;
-const address = process_address(public_key);
-exports.account = { private_key, keyPair, address, nonce, balance, public_key };
+const address_wallet = process_address(public_key);
+module.exports = { private_key, keyPair, address_wallet, nonce, balance, public_key };
