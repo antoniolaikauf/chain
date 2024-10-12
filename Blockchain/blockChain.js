@@ -13,16 +13,16 @@ const options = { family: 4 };
 */
 class Transection {
   // implementare looktime
-  constructor(amount, sender, reciver, fee) {
+  constructor(amount, sender, reciver, fees) {
     // calcolare change se necessario
     this.amount = amount;
     this.sender = sender;
     this.reciver = reciver;
-    this.fee = fee;
-    this.fee_miner = 0;
+    this.fees = fees;
     this.nonce = account.nonce;
     this.status = "pending";
     this.fee_price = 0.5;
+    this.fee_miner = this.fee_miner(); // reward
     this.timestamp = new Date().toLocaleString();
     this.txid = this.transection_id();
     this.signature = this.signature_check(account.keyPair);
@@ -34,8 +34,6 @@ class Transection {
       nel secondo ci deve essere il nonce del sender cosi che il nonce di 
       quella transazione venga messa all'interno della transazione 
     */
-    this.nonce++;
-    account.nonce++;
     let data = `${this.amount},${this.sender},${this.reciver},${this.nonce},${this.timestamp}`;
     const hash = crypto.createHash("sha256").update(data, "utf-8").digest("hex");
     return hash;
@@ -54,18 +52,20 @@ class Transection {
     return sign;
   }
 
-  send() {
+  fee_miner() {
     /* 1000000000 cyberini fanno 1 cy */
     const fee_fixed = 21.0 * 1000 * 1e-9;
     const total_fee = fee_fixed + (fee_fixed / 2) * (this.reciver.length - 1);
+    return total_fee;
+  }
 
+  send() {
     let index = 0;
-    this.fee_miner += total_fee;
     if (this.signature === true) {
       // al posto di this.sender ci sarà il balance di chi invia i soldi
       if (this.sender < this.amount * this.reciver.length) throw new RangeError("error balance ( not enough balance)");
       else if (this.amount < 0) throw new Error("value amount wrong");
-      else if (total_fee > this.fee) {
+      else if (this.fee_miner > this.fees) {
         throw Error("fee non enough");
       } else {
         /* Se le fee dell'account sono in eccesso vanno ritornate.
@@ -88,14 +88,14 @@ class Transection {
      claimed by a miner as the transaction fee.in bitcoin
      */
     const data = {
-      TXid: transection.txid,
-      timestamp: transection.timestamp,
+      TXid: this.txid,
+      timestamp: this.timestamp,
       input: {},
       output: {},
-      fee_need: this.fee_miner + " cy",
-      fee_user: this.fee + " cy",
-      signature: transection.signature,
-      nonce: { nonce_transection: transection.nonce, nonce_account: account.nonce },
+      fee_need: this.fee_miner, // in cy
+      fee_user: this.fees, // in cy
+      signature: this.signature,
+      nonce: { nonce_transection: this.nonce },
       public_key: account.keyPair.getPublic("hex"),
     };
     data.input["sender"] = this.sender;
@@ -191,56 +191,24 @@ class BlockChain {
   }
 }
 
-class Mempool {
-  constructor() {
-    this.transections = new Set();
-  }
-
-  transection_add(TX) {
-    this.transections.add(TX);
-  }
-
-  get_transection(TX) {
-    for (const element of this.transections) {
-      if (element.txid === TX) return element;
-      else console.log("transazione non presente");
-    }
-  }
-}
-
 let transections = [
   new Transection(100, account.address, ["account ricevente"], 1, null),
-  new Transection(100, account.address, ["account rivente"], 1, null),
-  new Transection(100, account.address, ["account"], 1, null),
-  new Transection(100, account.address, ["account ricevente"], 1, null),
-  new Transection(100, account.address, ["account cevente"], 1, null),
-  new Transection(100, account.address, ["accnt ricente"], 1, null),
-  new Transection(100, account.address, ["accnt rnte"], 1, null),
+  new Transection(100, account.address, ["account rivente"], 15, null),
+  new Transection(100, account.address, ["account"], 3, null),
+  new Transection(100, account.address, ["account ricevente"], 32, null),
+  new Transection(100, account.address, ["account cevente"], 45, null),
+  new Transection(100, account.address, ["accnt ricente"], 50, null),
+  new Transection(100, account.address, ["accnt rnte"], 20, null),
 ];
 
-// console.log(transections);
+console.log(transections);
 
-let transection = new Transection(100, account.address, ["account ricevente"], 1, null);
-
-// console.log(transection.signature);
-// console.log(transection.transection_data());
-
-// let transection2 = new Transection(100, account.address, ["account"], 1, null);
-// let transection3 = new Transection(100, account.address, ["account ricevente"], 1, null);
-// let transection4 = new Transection(100, account.address, ["account cevente"], 1, null);
-// let transection5 = new Transection(100, account.address, ["accnt ricente"], 1, null);
-// let transection2 = new Transection(100, account.address, ["account ricevente", "account ricevente"], 0.00050051000000000000002, null);
+// let transection = new Transection(100, account.address, ["account ricevente"], 1, null);
 
 /*
 prima di metterlo della mempool bisogna aspettare che tutti gli altri nodi 
 la verifichino e dopo si può mettere nella mempool 
 */
-
-// const mempool = new Mempool();
-// mempool.transection_add(transection);
-// mempool.get_transection(transection.txid);
-
-// let transections_hash = transections.map((element) => element.transection_id()); // ottieni l'hash delle transazioni
 
 // let block = new Block(transections_hash, transection.fee_miner);
 // console.log(block.tx_root);
@@ -268,20 +236,27 @@ UDP è un protocollo di rete che consente l'invio di pacchetti
 di dati tra host in una rete senza stabilire una connessione formale
 */
 // ottieni ip macchina
+
 dns.lookup(os.hostname(), options, (err, addr) => {
   if (err) {
     console.error(err);
   } else {
-    const server = new net.Socket();
-    server.connect(5000, addr, () => {
-      server.write(JSON.stringify(transection.transection_data()));
-    });
-    server.on("data", (data) => {
-      console.log(JSON.parse(data));
-    });
-    setTimeout(() => {
-      server.destroy();
-    }, 500);
+    let index = 0;
+    setInterval(() => {
+      const server = new net.Socket();
+      if (index === transections.length) index = 0;
+      server.connect(5000, addr, () => {
+        server.write(JSON.stringify(transections[index].transection_data()));
+        console.log(transections[index].transection_data());
+        index++;
+      });
+      server.on("data", (data) => {
+        console.log(JSON.parse(data));
+      });
+      setTimeout(() => {
+        server.destroy();
+      }, 500);
+    }, 1000);
   }
 });
 

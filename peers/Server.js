@@ -3,7 +3,7 @@ const net = require("net"); // modulo per rete peer to peer
 const dgram = require("dgram");
 const sender = dgram.createSocket("udp4");
 const { verifica } = require("../verify_transection/verifica.js");
-
+const { account } = require("../wallet/account.js");
 // sistemare meglio questo deciso di lasciare sempre aperto ed è la rete per le transazioni
 
 const port = 41234;
@@ -18,15 +18,13 @@ const server = net.createServer((socket) => {
   // data dal client
   socket.on("data", (data) => {
     const content = JSON.parse(data.toString());
-    console.log(content);
+    // console.log(content);
 
     if ("TXid" in content) {
-      if (
-        verifica.controllo_nonce(content.nonce.nonce_transection, content.nonce.nonce_account) &&
-        verifica.controllo_hash(content) &&
-        verifica.signature(content.nonce.nonce_transection, content.public_key, content.signature)
-      ) {
+      if (verifica.controllo_hash(content) && verifica.signature(content.nonce.nonce_transection, content.public_key, content.signature)) {
         //inviare transazione sulla rete
+        account.nonce++;
+        console.log(account.nonce);
         sender.send(Buffer.from(JSON.stringify(content)), port, address);
         socket.write(JSON.stringify(content));
         console.log("transazione corretta");
@@ -45,10 +43,10 @@ const server = net.createServer((socket) => {
   // client disconnessione
   socket.on("end", function () {
     // mostra solo quando è una connessione tra server e client, senza transazione
-    if (clients[clients.length - 1].transection) {
-      clients = clients.filter((element) => element.IP != socket.remoteAddress);
-      console.log(`client: ${socket.remoteAddress} scollegato\nclients collegati ${clients.length}`);
-    }
+    // if (clients[clients.length - 1].transection) {
+    clients = clients.filter((element) => element.IP != socket.remoteAddress);
+    console.log(`client: ${socket.remoteAddress} scollegato\nclients collegati ${clients.length}`);
+    // }
   });
   // errori
   socket.on("error", (err) => {

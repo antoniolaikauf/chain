@@ -48,8 +48,8 @@ listen_server.on("message", (msg, rinfo) => {
       verifica.signature(data.nonce.nonce_transection, data.public_key, data.signature)
     ) {
       // transazione ottenuta e controllata
-      mempool.add_transection(data);
-      console.log(mempool.sort_Mempool(mempool.Mempool));
+      // mempool.add_transection(data);
+      // console.log(mempool.sort_Mempool(mempool.Mempool));
       console.log("transazione corretta");
     } // qua va il nonce dell'account
     else console.log("transazione sbagliata");
