@@ -52,9 +52,9 @@ const server = net.createServer((socket) => {
  */
 
   socket.on("end", function () {
-    if (firstClient) {
+    if (CLIENT_CONNECTION) {
       console.log("transaione");
-      firstClient = false;
+      CLIENT_CONNECTION = false;
     } else {
       if (!clients.includes(socket.remoteAddress)) {
         clients = clients.filter((element) => element.IP != socket.remoteAddress);

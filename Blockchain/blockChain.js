@@ -1,10 +1,21 @@
 const crypto = require("crypto");
 let { keyPair, address_wallet, nonce } = require("../wallet/account.js");
 const net = require("net");
-const server = new net.Socket();
 const dns = require("dns");
 const os = require("os");
 const options = { family: 4 };
+var prompt = require("prompt-sync")();
+
+const AMOUNT = parseInt(prompt("quantità da inviare: "));
+// const WALLET_SENDER = prompt('wallet sender: ')
+
+const WALLET_RECIVER_NUMBER = parseInt(prompt("a quanti wallet vuoi inviare?: "));
+let wallet = [];
+for (let i = 0; i < WALLET_RECIVER_NUMBER; i++) {
+  const WALLET_RECIVER = prompt("wallet reciver: ");
+  wallet.push(WALLET_RECIVER);
+}
+const FEES = prompt("fee: ");
 
 /*
   N.B. le variabili con funzioni sempre per ultime perchè se vengono inizializzate prima dellle
@@ -197,16 +208,16 @@ class BlockChain {
 }
 
 let transections = [
-  new Transection(100, address_wallet, ["account ricevente"], 1, null),
-  new Transection(100, address_wallet, ["account rivente"], 15, null),
-  new Transection(100, address_wallet, ["account"], 3, null),
-  new Transection(100, address_wallet, ["account ricevente"], 32, null),
-  new Transection(100, address_wallet, ["account cevente"], 45, null),
-  new Transection(100, address_wallet, ["accnt ricente"], 50, null),
-  new Transection(100, address_wallet, ["accnt rnte"], 20, null),
+  new Transection(AMOUNT, address_wallet, wallet, FEES),
+  new Transection(AMOUNT, address_wallet, ["account rivente"], 15),
+  new Transection(AMOUNT, address_wallet, ["account"], 3),
+  new Transection(AMOUNT, address_wallet, ["account ricevente"], 32),
+  new Transection(AMOUNT, address_wallet, ["account cevente"], 45),
+  new Transection(AMOUNT, address_wallet, ["accnt ricente"], 50),
+  new Transection(AMOUNT, address_wallet, ["accnt rnte"], 20),
 ];
 
-// let transection = new Transection(100, account.address, ["account ricevente"], 1, null);
+// let transection = new Transection(100, account.address, ["account ricevente"], 1);
 
 /*
 prima di metterlo della mempool bisogna aspettare che tutti gli altri nodi 
@@ -245,20 +256,20 @@ dns.lookup(os.hostname(), options, (err, addr) => {
     console.error(err);
   } else {
     let index = 0;
-    setInterval(() => {
-      const server = new net.Socket();
-      if (index === transections.length) index = 0;
-      server.connect(5000, addr, () => {
-        server.write(JSON.stringify(transections[index].transection_data()));
-        index++;
-      });
-      server.on("data", (data) => {
-        console.log(JSON.parse(data));
-      });
-      setTimeout(() => {
-        server.destroy();
-      }, 500);
-    }, 1000);
+    // setInterval(() => {
+    const server = new net.Socket();
+    // if (index === transections.length) index = 0;
+    server.connect(5000, addr, () => {
+      server.write(JSON.stringify(transections[index].transection_data()));
+      index++;
+    });
+    server.on("data", (data) => {
+      console.log(JSON.parse(data));
+    });
+    setTimeout(() => {
+      server.destroy();
+    }, 500);
+    // }, 1000);
   }
 });
 
@@ -270,8 +281,7 @@ dns.lookup(os.hostname(), options, (err, addr) => {
  sistemare collegamento rete 
  */
 
-
- /*
+/*
 To sign a transaction in Ethereum, the originator must:
 
 Create a transaction data structure, containing nine fields: nonce, gasPrice, gasLimit, to, value, data, chainID, 0, 0.
