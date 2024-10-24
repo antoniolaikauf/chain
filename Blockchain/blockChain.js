@@ -181,7 +181,7 @@ class Block {
   POW() {
     // pow 111 inizio hash
     this.target = "1".repeat(this.time_value);
-    const time_start = performance.now();
+    const time_start = performance.now(); // time in millisecond
     let data = `${this.tx_root}${this.timestamp}'precedente blocco'${parseInt(this.target).toString(2)}`;
 
     while (!this.hash_block.startsWith(this.target)) {
@@ -189,8 +189,8 @@ class Block {
       data += this.nonce.toString();
       this.hash_block = this.hash_value(data);
     }
-    const time_end = performance.now();
-    let time = (time_end - time_start) / 1000;
+    const time_end = performance.now(); // time in millisecond
+    let time = (time_end - time_start) / 1000; // time in second
     /*
       time se troppo poco deve aumentare se troppo grande deve diminuire 
       cosi da modificare la pow  
