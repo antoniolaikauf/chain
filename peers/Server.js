@@ -8,6 +8,7 @@ let { nonce } = require("../wallet/account.js");
 
 const port = 41234;
 const address = "255.255.255.255";
+let CLIENT_CONNECTION = false;
 
 sender.bind(() => {
   sender.setBroadcast(true);
@@ -22,6 +23,7 @@ const server = net.createServer((socket) => {
 
     if ("TXid" in content) {
       if (verifica.controllo_hash(content) && verifica.signature(content.nonce.nonce_transection, content.public_key, content.signature)) {
+        CLIENT_CONNECTION = true;
         //inviare transazione sulla rete
         nonce++;
         sender.send(Buffer.from(JSON.stringify(content)), port, address);
@@ -30,23 +32,37 @@ const server = net.createServer((socket) => {
       } // qua va il nonce dell'account
       else console.log("transazione sbagliata");
     } else {
+      CLIENT_CONNECTION = false;
       const client = { IP: socket.remoteAddress, data: socket, transection: false };
       clients.push(client);
       console.log(`client collegati : ${clients.length}`);
       clients.forEach((element, i) => {
         console.log(`client ${element.IP} connesso`);
       });
-      // socket.write(`Benvenuto ${socket.remoteAddress}`);
     }
   });
-  // client disconnessione
+
+  /*
+  GESTIONE CHIUSURA CLIENT 
+  se client si connette allora per comunicare con server si imposta CLIENT_CONNECTION = false 
+  cosi se si chiudesse si intende il client che interagisce con server e si collega ad altri server.
+  quando si invia una nuova transazione con il client (che è lo stesso IP) viene impostata in true 
+  cosi che alla sua chiusura legge transazione e dopo si rimposta a false cosi che quando le transazioni
+  sono finite si legge il client che interagisce con altri nodi
+ */
+
   socket.on("end", function () {
-    // mostra solo quando è una connessione tra server e client, senza transazione
-    // if (clients[clients.length - 1].transection) {
-    clients = clients.filter((element) => element.IP != socket.remoteAddress);
-    console.log(`client: ${socket.remoteAddress} scollegato\nclients collegati ${clients.length}`);
-    // }
+    if (firstClient) {
+      console.log("transaione");
+      firstClient = false;
+    } else {
+      if (!clients.includes(socket.remoteAddress)) {
+        clients = clients.filter((element) => element.IP != socket.remoteAddress);
+        console.log(`client: ${socket.remoteAddress} scollegato\nclients collegati ${clients.length}`);
+      }
+    }
   });
+
   // errori
   socket.on("error", (err) => {
     console.error(`Socket error: ${err.message}`);

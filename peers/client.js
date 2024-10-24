@@ -31,6 +31,7 @@ listen_server.on("error", (err) => {
 
 listen_server.on("message", (msg, rinfo) => {
   let data = JSON.parse(msg);
+  
   if (!list_ip_address.has(rinfo.address)) {
     list_ip_address.add(rinfo.address);
     server_peer(rinfo.address);
@@ -47,7 +48,7 @@ listen_server.on("message", (msg, rinfo) => {
       mempool.add_transection(data);
       console.log(mempool.sort_Mempool(mempool.Mempool));
       console.log("transazione corretta");
-    } // qua va il nonce dell'account
+    } 
     else console.log("transazione sbagliata");
   }
 });

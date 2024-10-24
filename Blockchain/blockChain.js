@@ -43,6 +43,8 @@ class Transection {
   }
 
   signature_check(keys) {
+    //TODO // al posto della firma ci deve essere la transazione_id
+
     const nonce_transection = Buffer.from(nonce.toString()); // firma su nonce
     /*
       Non è necessario passare la chiave privata come argomento perché 
@@ -85,7 +87,7 @@ class Transection {
       }
     } else throw Error("signature wrong");
   }
-
+  //nonce, gasPrice, gasLimit, to, value, data, chainID, 0, 0.
   transection_data() {
     /* Any remaining amount of bitcoin that isn't used up will be
      claimed by a miner as the transaction fee.in bitcoin
@@ -266,4 +268,19 @@ dns.lookup(os.hostname(), options, (err, addr) => {
  sistemare altezza ma penso che si ameglio provare a sisteare la rete e dopo l'altezza
  altre caratterisiche si possono fare dopo 
  sistemare collegamento rete 
+ */
+
+
+ /*
+To sign a transaction in Ethereum, the originator must:
+
+Create a transaction data structure, containing nine fields: nonce, gasPrice, gasLimit, to, value, data, chainID, 0, 0.
+
+Produce an RLP-encoded serialized message of the transaction data structure.
+
+Compute the Keccak-256 hash of this serialized message.
+
+Compute the ECDSA signature, signing the hash with the originating EOA’s private key.
+
+Append the ECDSA signature’s computed v, r, and s values to the transaction.
  */
