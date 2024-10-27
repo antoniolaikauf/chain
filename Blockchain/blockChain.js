@@ -3,7 +3,6 @@ let { keyPair, address_wallet, nonce } = require("../wallet/account.js");
 const net = require("net");
 const dns = require("dns");
 const os = require("os");
-const { monitorEventLoopDelay } = require("perf_hooks");
 const options = { family: 4 };
 var prompt = require("prompt-sync")();
 
@@ -215,12 +214,6 @@ if (require.main === module) {
           client.end();
         });
       });
-      // client.on("data", (data) => {
-      //   // console.log(JSON.parse(data));
-      // });
-      // setTimeout(() => {
-      //   client.destroy();
-      // }, 500);
     }
   });
 } else exports.TXID = Transection; // esportazione classe

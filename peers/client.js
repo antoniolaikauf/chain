@@ -7,7 +7,7 @@ const os = require("os");
 const options = { family: 4 };
 const { verifica } = require("../verify_transection/verifica.js");
 let { mempool } = require("../Mempool/Mempool.js");
-const miner = true;
+const { miner_set_up } = require("../mining/mining.js");
 
 const port = 41234;
 const address = "255.255.255.255";
@@ -48,7 +48,7 @@ listen_server.on("message", (msg, rinfo) => {
       // transazione ottenuta e controllata
       mempool.add_transection(data.TXid);
       let mempool_sorted = Array.from(mempool.sort_Mempool(mempool.Mempool));
-      invio_mempool(mempool_sorted, list_ip_address);
+      if (miner_set_up) invio_mempool(mempool_sorted, list_ip_address);
       console.log("transazione corretta");
     } else console.log("transazione sbagliata");
   }
@@ -94,8 +94,6 @@ function server_peer(IP_address) {
 // invio mempool a tutti i peers collegati
 function invio_mempool(mempool, peers) {
   let dati = { Mempool: mempool };
-  console.log(dati);
-
   peers.forEach((ip) => {
     const client = net.Socket();
     client.connect(5000, ip, () => {

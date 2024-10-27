@@ -1,12 +1,11 @@
-// // nesuna instanza socket con il server perchè il node crea un collegamento socket con il client collegato
 const net = require("net"); // modulo per rete peer to peer
 const dgram = require("dgram");
 const sender = dgram.createSocket("udp4");
 const { verifica } = require("../verify_transection/verifica.js");
 let { nonce } = require("../wallet/account.js");
 const { TXID } = require("../Blockchain/blockChain.js");
+const { miner_set_up } = require("../mining/mining.js");
 
-const miner = true;
 // sistemare meglio questo deciso di lasciare sempre aperto ed è la rete per le transazioni
 const port = 41234;
 const address = "255.255.255.255";
@@ -34,7 +33,7 @@ const server = net.createServer((socket) => {
         console.log("transazione corretta");
       } // qua va il nonce dell'account
       else console.log("transazione sbagliata");
-    } else if (miner && "Mempool" in content) {
+    } else if (miner_set_up && "Mempool" in content) {
       CLIENT_CONNECTION = true;
       console.log(content);
     } else {
