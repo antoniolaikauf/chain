@@ -6,7 +6,7 @@ const ec = new EC("secp256k1"); // curva secp256k1
 function controllo_hash(data) {
   const data_hash = `${data.input.amount},${data.input.sender},${data.output.reciver},${data.nonce.nonce_transection},${data.timestamp}`;
   const hash = crypto.createHash("sha256").update(data_hash, "utf-8").digest("hex");
-  console.log(hash);
+  // console.log(hash); 
 
   return hash === data.TXid;
 }

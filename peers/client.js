@@ -6,7 +6,7 @@ const dns = require("dns");
 const os = require("os");
 const options = { family: 4 };
 const { verifica } = require("../verify_transection/verifica.js");
-// let miner_value = require("./Server.js");
+let { mempool } = require("../Mempool/Mempool.js");
 const miner = true;
 
 const port = 41234;
@@ -46,8 +46,9 @@ listen_server.on("message", (msg, rinfo) => {
   } else if ("TXid" in data) {
     if (verifica.controllo_hash(data.TXid) && verifica.signature(data.TXid.nonce.nonce_transection, data.TXid.public_key, data.TXid.signature)) {
       // transazione ottenuta e controllata
-      // mempool_sorted;
-      // console.log(mempool_sorted, typeof mempool_sorted);
+      mempool.add_transection(data.TXid);
+      let mempool_sorted = Array.from(mempool.sort_Mempool(mempool.Mempool));
+      invio_mempool(mempool_sorted, list_ip_address);
       console.log("transazione corretta");
     } else console.log("transazione sbagliata");
   }
@@ -90,6 +91,7 @@ function server_peer(IP_address) {
   });
 }
 
+// invio mempool a tutti i peers collegati
 function invio_mempool(mempool, peers) {
   let dati = { Mempool: mempool };
   console.log(dati);
@@ -97,9 +99,12 @@ function invio_mempool(mempool, peers) {
   peers.forEach((ip) => {
     const client = net.Socket();
     client.connect(5000, ip, () => {
-      client.write(JSON.stringify(dati), () => {
-        client.end();
-      });
+      // ritardare invio se no da problemi al server CLIENT_CONNECTION
+      setTimeout(() => {
+        client.write(JSON.stringify(dati), () => {
+          client.end();
+        });
+      }, 100);
     });
   });
 }

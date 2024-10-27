@@ -5,9 +5,8 @@ const sender = dgram.createSocket("udp4");
 const { verifica } = require("../verify_transection/verifica.js");
 let { nonce } = require("../wallet/account.js");
 const { TXID } = require("../Blockchain/blockChain.js");
-let { mempool } = require("../Mempool/Mempool.js");
+
 const miner = true;
-exports.miner_value = miner;
 // sistemare meglio questo deciso di lasciare sempre aperto ed è la rete per le transazioni
 const port = 41234;
 const address = "255.255.255.255";
@@ -27,11 +26,6 @@ const server = net.createServer((socket) => {
         verifica.controllo_hash(content.TXid) &&
         verifica.signature(content.TXid.nonce.nonce_transection, content.TXid.public_key, content.TXid.signature)
       ) {
-        mempool.add_transection(content.TXid);
-        // let mempool_sorted = mempool.sort_Mempool(mempool.Mempool);
-        console.log(mempool.sort_Mempool(mempool.Mempool), "dorteddd");
-
-        // if (miner) invio_mempool(mempool_sorted, list_ip_address);
         CLIENT_CONNECTION = true;
         //inviare transazione sulla rete
         nonce++;
@@ -40,6 +34,9 @@ const server = net.createServer((socket) => {
         console.log("transazione corretta");
       } // qua va il nonce dell'account
       else console.log("transazione sbagliata");
+    } else if (miner && "Mempool" in content) {
+      CLIENT_CONNECTION = true;
+      console.log(content);
     } else {
       CLIENT_CONNECTION = false;
       const client = { IP: socket.remoteAddress, data: socket, transection: false };
@@ -61,10 +58,7 @@ const server = net.createServer((socket) => {
  */
 
   socket.on("end", function () {
-    console.log(CLIENT_CONNECTION);
-
     if (CLIENT_CONNECTION) {
-      console.log("transazione");
       CLIENT_CONNECTION = false;
     } else {
       if (!clients.includes(socket.remoteAddress)) {
@@ -91,6 +85,5 @@ process.on("SIGINT", () => {
     client.data.destroy();
     clients.splice(i, 1); // rimuove elemento in array
   });
-
   if (clients.length === 0) process.exit(0);
 });

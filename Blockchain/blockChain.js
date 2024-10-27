@@ -209,16 +209,18 @@ if (require.main === module) {
     if (err) {
       console.error(err);
     } else {
-      const server = new net.Socket();
-      server.connect(5000, addr, () => {
-        server.write(JSON.stringify(dati));
+      const client = new net.Socket();
+      client.connect(5000, addr, () => {
+        client.write(JSON.stringify(dati), () => {
+          client.end();
+        });
       });
-      server.on("data", (data) => {
-        // console.log(JSON.parse(data));
-      });
-      setTimeout(() => {
-        server.destroy();
-      }, 500);
+      // client.on("data", (data) => {
+      //   // console.log(JSON.parse(data));
+      // });
+      // setTimeout(() => {
+      //   client.destroy();
+      // }, 500);
     }
   });
 } else exports.TXID = Transection; // esportazione classe
@@ -231,7 +233,7 @@ function dati_transection() {
     const WALLET_RECIVER = prompt("wallet reciver: ");
     WALLET.push(WALLET_RECIVER);
   }
-  const FEES = prompt("fee: ");
+  const FEES = parseInt(prompt("fee: "));
   return [AMOUNT, WALLET, FEES];
   // const WALLET_SENDER = prompt('wallet sender: ')
 }
