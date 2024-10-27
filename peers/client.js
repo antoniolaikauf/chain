@@ -6,10 +6,8 @@ const dns = require("dns");
 const os = require("os");
 const options = { family: 4 };
 const { verifica } = require("../verify_transection/verifica.js");
-const { TXID } = require("../Blockchain/blockChain.js");
-// console.log(new TXID(1000, "cjcjcj", "ccjcjcj", 12));
-
-let { mempool } = require("../Mempool/Mempool.js");
+// let miner_value = require("./Server.js");
+const miner = true;
 
 const port = 41234;
 const address = "255.255.255.255";
@@ -46,10 +44,10 @@ listen_server.on("message", (msg, rinfo) => {
     let addr = JSON.stringify({ ip: rinfo.address });
     listen_server.send(Buffer.from(addr), port, address);
   } else if ("TXid" in data) {
-    if (verifica.controllo_hash(data) && verifica.signature(data.nonce.nonce_transection, data.public_key, data.signature)) {
+    if (verifica.controllo_hash(data.TXid) && verifica.signature(data.TXid.nonce.nonce_transection, data.TXid.public_key, data.TXid.signature)) {
       // transazione ottenuta e controllata
-      mempool.add_transection(data);
-      console.log(mempool.sort_Mempool(mempool.Mempool));
+      // mempool_sorted;
+      // console.log(mempool_sorted, typeof mempool_sorted);
       console.log("transazione corretta");
     } else console.log("transazione sbagliata");
   }
@@ -88,6 +86,20 @@ function server_peer(IP_address) {
       setTimeout(() => {
         process.exit(0);
       }, 100);
+    });
+  });
+}
+
+function invio_mempool(mempool, peers) {
+  let dati = { Mempool: mempool };
+  console.log(dati);
+
+  peers.forEach((ip) => {
+    const client = net.Socket();
+    client.connect(5000, ip, () => {
+      client.write(JSON.stringify(dati), () => {
+        client.end();
+      });
     });
   });
 }

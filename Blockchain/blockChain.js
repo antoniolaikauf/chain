@@ -196,12 +196,14 @@ class BlockChain {
   }
 }
 
+/*
+  se il file viene eseguito nel prompt allora crea una transazione 
+  se no viene importato solo la classe
+*/
 if (require.main === module) {
-  let dati = dati_transection();
-  console.log(dati);
-
-  let transection = new_transection(dati[0], address_wallet, dati[1], dati[2]);
-
+  let dati_tran = dati_transection();
+  let transection = new_transection(dati_tran[0], address_wallet, dati_tran[1], dati_tran[2]);
+  let dati = { TXid: transection.transection_data() };
   // invio transazione a nodo del client
   dns.lookup(os.hostname(), options, (err, addr) => {
     if (err) {
@@ -209,18 +211,18 @@ if (require.main === module) {
     } else {
       const server = new net.Socket();
       server.connect(5000, addr, () => {
-        server.write(JSON.stringify(transection.transection_data()));
+        server.write(JSON.stringify(dati));
       });
       server.on("data", (data) => {
-        console.log(JSON.parse(data));
+        // console.log(JSON.parse(data));
       });
       setTimeout(() => {
         server.destroy();
       }, 500);
     }
   });
-} else exports.TXID = Transection;
-
+} else exports.TXID = Transection; // esportazione classe
+// ottenimento dati da user
 function dati_transection() {
   const AMOUNT = parseInt(prompt("quantità da inviare: "));
   const WALLET_RECIVER_NUMBER = parseInt(prompt("a quanti wallet vuoi inviare?: "));
@@ -233,19 +235,10 @@ function dati_transection() {
   return [AMOUNT, WALLET, FEES];
   // const WALLET_SENDER = prompt('wallet sender: ')
 }
-
+// creazione trasnsazione
 function new_transection(amount, wallet_sender, wallet_reciver, fee) {
   return new Transection(amount, wallet_sender, wallet_reciver, fee);
 }
-
-// new Transection(AMOUNT, address_wallet, ["account rivente"], 15),
-// new Transection(AMOUNT, address_wallet, ["account"], 3),
-// new Transection(AMOUNT, address_wallet, ["account ricevente"], 32),
-// new Transection(AMOUNT, address_wallet, ["account cevente"], 45),
-// new Transection(AMOUNT, address_wallet, ["accnt ricente"], 50),
-// new Transection(AMOUNT, address_wallet, ["accnt rnte"], 20),
-
-// let transection = new Transection(100, account.address, ["account ricevente"], 1);
 
 /*
 prima di metterlo della mempool bisogna aspettare che tutti gli altri nodi 
