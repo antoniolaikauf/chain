@@ -3,19 +3,9 @@ let { keyPair, address_wallet, nonce } = require("../wallet/account.js");
 const net = require("net");
 const dns = require("dns");
 const os = require("os");
+const { monitorEventLoopDelay } = require("perf_hooks");
 const options = { family: 4 };
 var prompt = require("prompt-sync")();
-
-const AMOUNT = parseInt(prompt("quantità da inviare: "));
-// const WALLET_SENDER = prompt('wallet sender: ')
-
-const WALLET_RECIVER_NUMBER = parseInt(prompt("a quanti wallet vuoi inviare?: "));
-let wallet = [];
-for (let i = 0; i < WALLET_RECIVER_NUMBER; i++) {
-  const WALLET_RECIVER = prompt("wallet reciver: ");
-  wallet.push(WALLET_RECIVER);
-}
-const FEES = prompt("fee: ");
 
 /*
   N.B. le variabili con funzioni sempre per ultime perchè se vengono inizializzate prima dellle
@@ -120,7 +110,6 @@ class Transection {
     return data;
   }
 }
-
 class Block {
   constructor(transections, reward_transection, copy, target, hash_prev, uncle) {
     this.altezza = 0;
@@ -207,15 +196,54 @@ class BlockChain {
   }
 }
 
-let transections = [
-  new Transection(AMOUNT, address_wallet, wallet, FEES),
-  new Transection(AMOUNT, address_wallet, ["account rivente"], 15),
-  new Transection(AMOUNT, address_wallet, ["account"], 3),
-  new Transection(AMOUNT, address_wallet, ["account ricevente"], 32),
-  new Transection(AMOUNT, address_wallet, ["account cevente"], 45),
-  new Transection(AMOUNT, address_wallet, ["accnt ricente"], 50),
-  new Transection(AMOUNT, address_wallet, ["accnt rnte"], 20),
-];
+if (require.main === module) {
+  let dati = dati_transection();
+  console.log(dati);
+
+  let transection = new_transection(dati[0], address_wallet, dati[1], dati[2]);
+
+  // invio transazione a nodo del client
+  dns.lookup(os.hostname(), options, (err, addr) => {
+    if (err) {
+      console.error(err);
+    } else {
+      const server = new net.Socket();
+      server.connect(5000, addr, () => {
+        server.write(JSON.stringify(transection.transection_data()));
+      });
+      server.on("data", (data) => {
+        console.log(JSON.parse(data));
+      });
+      setTimeout(() => {
+        server.destroy();
+      }, 500);
+    }
+  });
+} else exports.TXID = Transection;
+
+function dati_transection() {
+  const AMOUNT = parseInt(prompt("quantità da inviare: "));
+  const WALLET_RECIVER_NUMBER = parseInt(prompt("a quanti wallet vuoi inviare?: "));
+  let WALLET = [];
+  for (let i = 0; i < WALLET_RECIVER_NUMBER; i++) {
+    const WALLET_RECIVER = prompt("wallet reciver: ");
+    WALLET.push(WALLET_RECIVER);
+  }
+  const FEES = prompt("fee: ");
+  return [AMOUNT, WALLET, FEES];
+  // const WALLET_SENDER = prompt('wallet sender: ')
+}
+
+function new_transection(amount, wallet_sender, wallet_reciver, fee) {
+  return new Transection(amount, wallet_sender, wallet_reciver, fee);
+}
+
+// new Transection(AMOUNT, address_wallet, ["account rivente"], 15),
+// new Transection(AMOUNT, address_wallet, ["account"], 3),
+// new Transection(AMOUNT, address_wallet, ["account ricevente"], 32),
+// new Transection(AMOUNT, address_wallet, ["account cevente"], 45),
+// new Transection(AMOUNT, address_wallet, ["accnt ricente"], 50),
+// new Transection(AMOUNT, address_wallet, ["accnt rnte"], 20),
 
 // let transection = new Transection(100, account.address, ["account ricevente"], 1);
 
@@ -238,8 +266,6 @@ messa nella mempool
 // non tutta la copia della blockchain
 // fuori header tutte le transazioni all'interno del blocco
 
-// transazione, quantità, address, feee, change
-
 /*
 POW SI PUò FARE UGUALE A BITCOIN O ANCHE CHE DEVE TROVARE UN HASH DEL BLOCCCO CHE INIZZI CON 0000 USANDO UNO 
 SHA CON INPUT IL NONCE CHE è QUELLO CHE DEVE CAMBIARE I DATI E HEADER
@@ -250,30 +276,6 @@ UDP è un protocollo di rete che consente l'invio di pacchetti
 di dati tra host in una rete senza stabilire una connessione formale
 */
 // ottieni ip macchina
-
-dns.lookup(os.hostname(), options, (err, addr) => {
-  if (err) {
-    console.error(err);
-  } else {
-    let index = 0;
-    // setInterval(() => {
-    const server = new net.Socket();
-    // if (index === transections.length) index = 0;
-    server.connect(5000, addr, () => {
-      server.write(JSON.stringify(transections[index].transection_data()));
-      index++;
-    });
-    server.on("data", (data) => {
-      console.log(JSON.parse(data));
-    });
-    setTimeout(() => {
-      server.destroy();
-    }, 500);
-    // }, 1000);
-  }
-});
-
-// transazione dopo che è stata verificata dai nodi viene messa dentro alla mempool
 
 /* TODO
  sistemare altezza ma penso che si ameglio provare a sisteare la rete e dopo l'altezza

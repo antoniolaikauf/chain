@@ -6,6 +6,9 @@ const dns = require("dns");
 const os = require("os");
 const options = { family: 4 };
 const { verifica } = require("../verify_transection/verifica.js");
+const { TXID } = require("../Blockchain/blockChain.js");
+// console.log(new TXID(1000, "cjcjcj", "ccjcjcj", 12));
+
 let { mempool } = require("../Mempool/Mempool.js");
 
 const port = 41234;
@@ -28,10 +31,10 @@ listen_server.on("listening", () => {
 listen_server.on("error", (err) => {
   console.error(err.message);
 });
-
+// rinf è IP da cui si sta inviando i dati
 listen_server.on("message", (msg, rinfo) => {
   let data = JSON.parse(msg);
-  
+
   if (!list_ip_address.has(rinfo.address)) {
     list_ip_address.add(rinfo.address);
     server_peer(rinfo.address);
@@ -48,8 +51,7 @@ listen_server.on("message", (msg, rinfo) => {
       mempool.add_transection(data);
       console.log(mempool.sort_Mempool(mempool.Mempool));
       console.log("transazione corretta");
-    } 
-    else console.log("transazione sbagliata");
+    } else console.log("transazione sbagliata");
   }
 });
 listen_server.bind(port);
