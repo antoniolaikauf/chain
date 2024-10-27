@@ -10,9 +10,8 @@ function entropia() {
   return crypto.randomBytes(16); // 128 bits entropia
 }
 
-const path_bits = path.join(__dirname, "bits.json"); // percorso per bits randomici
-
 const valid_private_key = (n, b) => {
+  const path_bits = path.join(__dirname, "bits.json"); // percorso per bits randomici
   let private_key = null;
   if (fs.existsSync(path_bits)) {
     // file con bit entropia esistente
@@ -33,7 +32,11 @@ const valid_private_key = (n, b) => {
     } else valid_private_key(n, entropia());
   }
   const seed = BigInt("0x" + b.toString("hex")); // seed
-  // console.log(seed);
+  let seed_bit = "";
+  b.forEach((element) => {
+    seed_bit += element.toString(2).padStart(8, "0");
+  });
+  console.log(seed_bit + "\n" + seed);
   return private_key;
 };
 
@@ -47,8 +50,6 @@ const public_key = keyPair.getPublic("hex");
   se ha 02 o 03 allora è compressa 02 sarebbe il prefisso che indica y è un valore pari 03 è un
   valore dispari 
 */
-
-// console.log(`private key: ${private_key.toString("hex")}\npubblic key: ${public_key}`);
 
 function process_address(PK) {
   // doppio hash e alla fine in base58 piu il prefisso per riconoscere l'address
@@ -66,5 +67,5 @@ function process_address(PK) {
 
 let nonce = 0;
 let balance = 1000;
-const address_wallet = process_address(public_key);
-module.exports = { private_key, keyPair, address_wallet, nonce, balance, public_key };
+const address_account = process_address(public_key);
+module.exports = { private_key, keyPair, address_account, nonce, balance, public_key };
