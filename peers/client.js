@@ -1,3 +1,6 @@
+/*
+  collegarsi sempre a se stessi per primi cosi che il mempool viene inviato solo a noi e non ad altri nodi 
+*/
 const net = require("net"); // protocollo TCP/IP
 const dgram = require("dgram"); // UDP è un protocollo di rete che consente l'invio di pacchetti di dati tra host in una rete senza stabilire una connessione formale
 const listen_server = dgram.createSocket("udp4");
@@ -7,7 +10,6 @@ const os = require("os");
 const options = { family: 4 };
 const { verifica } = require("../verify_transection/verifica.js");
 let { mempool } = require("../Mempool/Mempool.js");
-const { miner_set_up } = require("../mining/mining.js");
 
 const port = 41234;
 const address = "255.255.255.255";
@@ -44,11 +46,11 @@ listen_server.on("message", (msg, rinfo) => {
     let addr = JSON.stringify({ ip: rinfo.address });
     listen_server.send(Buffer.from(addr), port, address);
   } else if ("TXid" in data) {
+    // controllo transazione ricevuta da server
     if (verifica.controllo_hash(data.TXid) && verifica.signature(data.TXid.nonce.nonce_transection, data.TXid.public_key, data.TXid.signature)) {
-      // transazione ottenuta e controllata
       mempool.add_transection(data.TXid);
       let mempool_sorted = Array.from(mempool.sort_Mempool(mempool.Mempool));
-      if (miner_set_up) invio_mempool(mempool_sorted, list_ip_address);
+      invio_mempool(mempool_sorted, list_ip_address); // invio transazione 
       console.log("transazione corretta");
     } else console.log("transazione sbagliata");
   }
@@ -94,15 +96,16 @@ function server_peer(IP_address) {
 // invio mempool a tutti i peers collegati
 function invio_mempool(mempool, peers) {
   let dati = { Mempool: mempool };
-  peers.forEach((ip) => {
-    const client = net.Socket();
-    client.connect(5000, ip, () => {
-      // ritardare invio se no da problemi al server CLIENT_CONNECTION
-      setTimeout(() => {
-        client.write(JSON.stringify(dati), () => {
-          client.end();
-        });
-      }, 100);
-    });
+  const client = net.Socket();
+  /*
+  inviare la mempool solo a se stessi 
+  */
+  client.connect(5000, peers[0], () => {
+    // ritardare invio se no da problemi al server CLIENT_CONNECTION
+    setTimeout(() => {
+      client.write(JSON.stringify(dati), () => {
+        client.end();
+      });
+    }, 100);
   });
 }

@@ -21,6 +21,7 @@ const server = net.createServer((socket) => {
   socket.on("data", (data) => {
     const content = JSON.parse(data.toString());
     if ("TXid" in content) {
+      // controllo transazione ricevuta
       if (
         verifica.controllo_hash(content.TXid) &&
         verifica.signature(content.TXid.nonce.nonce_transection, content.TXid.public_key, content.TXid.signature)
@@ -33,9 +34,12 @@ const server = net.createServer((socket) => {
         console.log("transazione corretta");
       } // qua va il nonce dell'account
       else console.log("transazione sbagliata");
-    } else if (miner_set_up && "Mempool" in content) {
+    } else if ("Mempool" in content) {
       CLIENT_CONNECTION = true;
       console.log(content);
+      if (miner_set_up) {
+        // TODO qua mettere funzione per miner
+      }
     } else {
       CLIENT_CONNECTION = false;
       const client = { IP: socket.remoteAddress, data: socket, transection: false };
