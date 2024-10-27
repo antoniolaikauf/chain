@@ -1,14 +1,9 @@
 TENTATIVO BLOCKCHAIN
 
-prima server e dopo client
+## procedimento
 
-provare il checksum di eth per address capitolo 4 in fondo del libro su github
+1. eseguire file server.js per attivare il server
 
-transazione passa prima dal nodo e quindi servere che è in ascolto sulla const port = 41234;
-const address = "255.255.255.255";
-e dopo se è corretta la ritrasmette e al client del nodo e sulla rete sopra
+2. Eseguire il file client.js per condividere l'indirizzo IP della macchina sulla rete tramite il protocollo udp4. Quando si riceve un IP, ci si collega al server. Ogni computer si collegherà al proprio server; quando un'altra macchina esegue il file, invierà il proprio IP sulla rete, e chiunque sia in ascolto otterrà il suo IP per potersi collegare al suo server. Tuttavia, la nuova persona collegata non sarà connessa al server degli altri. Per evitare questo, viene inviato un messaggio sulla rete affinché l'ultima persona riceva anche gli IP a cui si è già connessi.
 
-## procedimento 
-
-1. eseguire file server.js per attivare il server 
-2. eseguire file client.js cosi da condividere l'IP della macchina sulla rete tramite il protocollo udp4, una volta che si riceve il IP ci si collega al server. Ogni computer si collegherà al proprio server 
+3. eseguire file blockchain (si cambierà il nome più avanti) per eseguire una transazione 
