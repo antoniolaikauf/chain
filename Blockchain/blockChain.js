@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-let { keyPair, address_wallet, nonce } = require("../wallet/account.js");
+let { keyPair, address_account, nonce } = require("../wallet/account.js");
 const net = require("net");
 const dns = require("dns");
 const os = require("os");
@@ -201,7 +201,7 @@ class BlockChain {
 */
 if (require.main === module) {
   let dati_tran = dati_transection();
-  let transection = new_transection(dati_tran[0], address_wallet, dati_tran[1], dati_tran[2]);
+  let transection = new_transection(dati_tran[0], address_account, dati_tran[1], dati_tran[2]);
   let dati = { TXid: transection.transection_data() };
   // invio transazione a nodo del client
   dns.lookup(os.hostname(), options, (err, addr) => {
