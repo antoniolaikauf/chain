@@ -1,9 +1,9 @@
 const miner = true; // impostato su true allora il nodo fara da miner 
 
 class Block {
-  constructor(transections, reward_transection, copy, target, hash_prev, uncle) {
+  constructor(transections, reward_transection, hash_prev) {
     this.altezza = 0;
-    this.copy = copy; // balance all account
+    this.copy = null // balance all account
     this.target = null;
     this.reward = (2 + reward_transection) * 1e9; // cyberini
     this.hash_prev = hash_prev;
@@ -14,6 +14,7 @@ class Block {
     this.hash_block = "";
     this.time_value = 3;
   }
+
   // coinbase_transection
   cb_transection() {
     const reward = Math.round(this.reward).toString(16);
@@ -61,7 +62,7 @@ class Block {
     // pow 111 inizio hash
     this.target = "1".repeat(this.time_value);
     const time_start = performance.now(); // time in millisecond
-    let data = `${this.tx_root}${this.timestamp}'precedente blocco'${parseInt(this.target).toString(2)}`;
+    let data = `${this.nonce}${this.hash_prev}${ this.tx_root}${this.timestamp }'precedente blocco'${ parseInt(this.target).toString(2) }`;
 
     while (!this.hash_block.startsWith(this.target)) {
       this.nonce++;

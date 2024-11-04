@@ -5,7 +5,8 @@ const { verifica } = require("../verify_transection/verifica.js");
 let { nonce } = require("../wallet/account.js");
 const { TXID } = require("../Blockchain/blockChain.js");
 const { miner, Block } = require("../mining/mining.js");
-// let { mempool } = require("../Mempool/Mempool.js");
+let transections = new Set();
+let blocks = new Set();
 
 // sistemare meglio questo deciso di lasciare sempre aperto ed è la rete per le transazioni
 const port = 41234;
@@ -38,18 +39,29 @@ const server = net.createServer((socket) => {
       client_connection = true;
       // console.log(content);
       if (miner) {
-        let transections = new Set();
-        transections = content.Mempool;
-        // console.log(transections);
-        let transection_true = transections.map(
-          (element) => new TXID(element.input.amount, element.input.sender, element.output.reciver, element.fee_user)
+        const last_transection_in_mempool = content.Mempool[content.Mempool.length - 1];
+        
+        const tx = new TXID(
+          last_transection_in_mempool.input.amount,
+          last_transection_in_mempool.input.sender,
+          last_transection_in_mempool.output.reciver,
+          last_transection_in_mempool.fee_user
         );
-        console.log(transection_true);
+        transections.add(tx);
+      
+        if (transections.size > 3) {
+          let fee_users = 0;
+          transections.forEach((element) => (fee_users += element.fee_miner));
+          console.log(fee_users);
+          if (blocks.size === 0) block_prev_hash = "0000000000000000000000000000000000000000000000000000000000000000";
+          else block_prev_hash = blocks[blocks.size - 1];
+          const block = new Block(Array(transections), fee_users, block_prev_hash);
+          transections = new Set();
+          blocks.add(block);
+        }
+        console.log(blocks);
 
         // content fa da mempool qua
-        if (transections.length > 3) {
-          console.log("creazione blocco");
-        }
       }
     } else {
       client_connection = false;
