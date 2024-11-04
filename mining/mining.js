@@ -1,5 +1,5 @@
 const miner = true; // impostato su true allora il nodo fara da miner 
-
+const crypto = require("crypto");
 class Block {
   constructor(transections, reward_transection, hash_prev) {
     this.altezza = 0;
@@ -31,7 +31,7 @@ class Block {
     if (TXS.length % 2 === 1) TXS.push(TXS[TXS.length - 1]);
     while (TXS.length > 1) {
       array_layer_hash = TXS.map((element) => this.hash_value(element));
-      console.log(TXS);
+      // console.log(TXS);
 
       TXS = [];
       for (let i = 0; i < array_layer_hash.length; i += 2) {

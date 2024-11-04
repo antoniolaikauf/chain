@@ -40,7 +40,7 @@ const server = net.createServer((socket) => {
       // console.log(content);
       if (miner) {
         const last_transection_in_mempool = content.Mempool[content.Mempool.length - 1];
-        
+
         const tx = new TXID(
           last_transection_in_mempool.input.amount,
           last_transection_in_mempool.input.sender,
@@ -48,20 +48,20 @@ const server = net.createServer((socket) => {
           last_transection_in_mempool.fee_user
         );
         transections.add(tx);
-      
+
         if (transections.size > 3) {
           let fee_users = 0;
           transections.forEach((element) => (fee_users += element.fee_miner));
-          console.log(fee_users);
+          //   console.log(fee_users);
           if (blocks.size === 0) block_prev_hash = "0000000000000000000000000000000000000000000000000000000000000000";
           else block_prev_hash = blocks[blocks.size - 1];
-          const block = new Block(Array(transections), fee_users, block_prev_hash);
+          // console.log(Array.from(transections));
+          let transections_hash = Array.from(transections).map((element) => element.txid);
+          const block = new Block(transections_hash, fee_users, block_prev_hash);
           transections = new Set();
           blocks.add(block);
+          console.log(blocks);
         }
-        console.log(blocks);
-
-        // content fa da mempool qua
       }
     } else {
       client_connection = false;
