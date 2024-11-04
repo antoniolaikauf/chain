@@ -12,7 +12,7 @@ function merge_array(left, right) {
     /* se elemento di array di sinistra è maggiore di elemento di array di destra
      elemento di destra va per primo essendo che è più piccolo se no elemento di sinistra va per primo 
     */
-    if (left[leftIndex].fee_user > right[rightIndex].fee_user) {
+    if (left[leftIndex].fees > right[rightIndex].fees) {
       array_sorted.push(right[rightIndex]);
       rightIndex++;
     } else {
@@ -20,6 +20,8 @@ function merge_array(left, right) {
       leftIndex++;
     }
   }
+  console.log(array_sorted);
+  
   /* 
   concatena il rimanente array  es [38] [27] il ciclo sopra ha aggiunto solo un numero e quindi bisogna aggiungere 
   anche i restanti numeri che avviene con concat

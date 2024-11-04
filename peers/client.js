@@ -49,8 +49,8 @@ listen_server.on("message", (msg, rinfo) => {
     // controllo transazione ricevuta da server
     if (verifica.controllo_hash(data.TXid) && verifica.signature(data.TXid.nonce.nonce_transection, data.TXid.public_key, data.TXid.signature)) {
       mempool.add_transection(data.TXid);
-      let mempool_sorted = Array.from(mempool.sort_Mempool(mempool.Mempool));
-      invio_mempool(mempool_sorted, list_ip_address); // invio transazione 
+      // le transazioni si inviano sotto forma di array perche se sono dei set non si inviano
+      invio_mempool(Array.from(mempool.Mempool), list_ip_address); // invio transazione 
       console.log("transazione corretta");
     } else console.log("transazione sbagliata");
   }

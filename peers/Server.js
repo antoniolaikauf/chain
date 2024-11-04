@@ -5,6 +5,7 @@ const { verifica } = require("../verify_transection/verifica.js");
 let { nonce } = require("../wallet/account.js");
 const { TXID } = require("../Blockchain/blockChain.js");
 const { miner, Block } = require("../mining/mining.js");
+let { mempool } = require("../Mempool/Mempool.js");
 let transections = new Set();
 let blocks = new Set();
 
@@ -37,7 +38,6 @@ const server = net.createServer((socket) => {
       } else console.log("transazione sbagliata");
     } else if ("Mempool" in content) {
       client_connection = true;
-      // console.log(content);
       if (miner) {
         const last_transection_in_mempool = content.Mempool[content.Mempool.length - 1];
 
@@ -49,22 +49,25 @@ const server = net.createServer((socket) => {
         );
         transections.add(tx);
 
+        // console.log(transections);
         if (transections.size > 0) {
+          // let mempool_sorted = Array.from(mempool.sort_Mempool(mempool.Mempool));
+          let transections_sort = Array.from(mempool.sort_Mempool(transections)); 
+          console.log(transections_sort);
+          
           let fee_users = 0;
           transections.forEach((element) => (fee_users += element.fee_miner));
           //   console.log(fee_users);
           if (blocks.size === 0) block_prev_hash = "0000000000000000000000000000000000000000000000000000000000000000";
           else {
             block_prev_hash = [...blocks][blocks.size - 1].hash_block;
-            console.log(block_prev_hash);
+            // console.log(block_prev_hash);
           }
-
-          // console.log(Array.from(transections));
-          let transections_hash = Array.from(transections).map((element) => element.txid);
-          const block = new Block(transections_hash, fee_users, block_prev_hash);
-          transections = new Set();
+          let transections_hash = Array.from(transections_sort).map((element) => element.txid); // hash delle transazioni
+          const block = new Block(transections_hash, fee_users, block_prev_hash); // creazione blocco
+          // transections = new Set(); // reset
           blocks.add(block);
-          console.log(blocks);
+          // console.log(blocks);
         }
       }
     } else {
