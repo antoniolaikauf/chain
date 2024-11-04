@@ -4,7 +4,8 @@ const sender = dgram.createSocket("udp4");
 const { verifica } = require("../verify_transection/verifica.js");
 let { nonce } = require("../wallet/account.js");
 const { TXID } = require("../Blockchain/blockChain.js");
-const { miner_set_up } = require("../mining/mining.js");
+const { miner, Block } = require("../mining/mining.js");
+// let { mempool } = require("../Mempool/Mempool.js");
 
 // sistemare meglio questo deciso di lasciare sempre aperto ed è la rete per le transazioni
 const port = 41234;
@@ -32,13 +33,23 @@ const server = net.createServer((socket) => {
         sender.send(Buffer.from(JSON.stringify(content)), port, address); // invia dati a rete udp4
         socket.write(JSON.stringify(content)); // invia dati a client
         console.log("transazione corretta");
-      } // qua va il nonce dell'account
-      else console.log("transazione sbagliata");
+      } else console.log("transazione sbagliata");
     } else if ("Mempool" in content) {
       client_connection = true;
-      console.log(content);
-      if (miner_set_up) {
-        // TODO qua mettere funzione per miner
+      // console.log(content);
+      if (miner) {
+        let transections = new Set();
+        transections = content.Mempool;
+        // console.log(transections);
+        let transection_true = transections.map(
+          (element) => new TXID(element.input.amount, element.input.sender, element.output.reciver, element.fee_user)
+        );
+        console.log(transection_true);
+
+        // content fa da mempool qua
+        if (transections.length > 3) {
+          console.log("creazione blocco");
+        }
       }
     } else {
       client_connection = false;

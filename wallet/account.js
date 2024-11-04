@@ -34,9 +34,9 @@ const valid_private_key = (n, b) => {
   const seed = BigInt("0x" + b.toString("hex")); // seed
   let seed_bit = "";
   b.forEach((element) => {
-    seed_bit += element.toString(2).padStart(8, "0");
+    seed_bit += element.toString(2).padStart(8, "0"); // seed in number
   });
-  console.log(seed_bit + "\n" + seed);
+  // console.log(seed_bit + "\n" + seed);
   return private_key;
 };
 
