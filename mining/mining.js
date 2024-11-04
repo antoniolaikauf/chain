@@ -1,18 +1,18 @@
-const miner = true; // impostato su true allora il nodo fara da miner 
+const miner = true; // impostato su true allora il nodo fara da miner
 const crypto = require("crypto");
 class Block {
   constructor(transections, reward_transection, hash_prev) {
     this.altezza = 0;
-    this.copy = null // balance all account
-    this.target = null;
+    this.copy = null; // balance all account
+    this.time_value = 3;
     this.reward = (2 + reward_transection) * 1e9; // cyberini
     this.hash_prev = hash_prev;
     // this.uncle = uncle;
     this.nonce = 0; // pow
+    this.target = parseInt("1".repeat(this.time_value)).toString(2);
     this.tx_root = this.merkel_tree(transections);
     this.timestamp = new Date().toLocaleString();
-    this.hash_block = "";
-    this.time_value = 3;
+    this.hash_block = this.POW();
   }
 
   // coinbase_transection
@@ -59,15 +59,14 @@ class Block {
   }
 
   POW() {
-    // pow 111 inizio hash
-    this.target = "1".repeat(this.time_value);
+    let hash = "";
     const time_start = performance.now(); // time in millisecond
-    let data = `${this.nonce}${this.hash_prev}${ this.tx_root}${this.timestamp }'precedente blocco'${ parseInt(this.target).toString(2) }`;
+    let data = `${this.nonce}${this.hash_prev}${this.tx_root}${this.timestamp}'precedente blocco'${this.target}`;
 
-    while (!this.hash_block.startsWith(this.target)) {
+    while (!hash.startsWith(parseInt(this.target, 2))) {
       this.nonce++;
       data += this.nonce.toString();
-      this.hash_block = this.hash_value(data);
+      hash = this.hash_value(data);
     }
     const time_end = performance.now(); // time in millisecond
     let time = (time_end - time_start) / 1000; // time in second
@@ -77,10 +76,10 @@ class Block {
     */
     if (0 < time > 1) this.time_value = 4;
     else if (time > 20) this.time_value = 3;
-    return this.hash_block;
+    return hash;
   }
 }
 
 if (require.main !== module) {
-  module.exports = {miner,  Block}
+  module.exports = { miner, Block };
 }
