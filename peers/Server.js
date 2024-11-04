@@ -57,15 +57,20 @@ const server = net.createServer((socket) => {
           
           let fee_users = 0;
           transections.forEach((element) => (fee_users += element.fee_miner));
-          //   console.log(fee_users);
           if (blocks.size === 0) block_prev_hash = "0000000000000000000000000000000000000000000000000000000000000000";
           else {
-            block_prev_hash = [...blocks][blocks.size - 1].hash_block;
-            // console.log(block_prev_hash);
+            block_prev_hash = [...blocks][blocks.size - 1].hash_block; // selezione del hash precedente SINTASSI PER I SET :)
           }
           let transections_hash = Array.from(transections_sort).map((element) => element.txid); // hash delle transazioni
           const block = new Block(transections_hash, fee_users, block_prev_hash); // creazione blocco
-          // transections = new Set(); // reset
+
+
+          // TODO RIMUOVERE LE TRANSAZIONI CHE SONO NEL BLOCCO 
+          // SCEGLIERE LE ULTIME TRE TRANSAZIONI CHE SONO QUELLE CHE PAGANO DI PIU VOLENDO E QUINDI MODIFICARE IL FOREACH 
+          // DI transections IN CUI PRENDI LE FEE SOLO DI QUELLE TRANSAZIONI E LE RIMUOVI DA transections
+          // DOPO SI DOVREBBE EVOCARE TUTTE LE FUNZIONI DI TRANSAZIONI NEL BLOCCO E SISTEMARE L'ALTEZZA DEL BLOCCO
+          
+          
           blocks.add(block);
           // console.log(blocks);
         }
